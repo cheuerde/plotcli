@@ -13,6 +13,7 @@ plotcli_scatter(
   y_label = "y",
   color = NULL,
   braille = TRUE,
+  name = "scatter",
   ...
 )
 }
@@ -32,6 +33,8 @@ plotcli_scatter(
 \item{color}{Color of the plot elements (default: NULL)}
 
 \item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "scatter")}
 
 \item{...}{Additional arguments passed to the plotcli$new() function}
 }

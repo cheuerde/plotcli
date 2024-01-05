@@ -14,74 +14,6 @@ cat_plot_matrix <- function(plot_matrix) {
     }
 }
 
-#' Combine plot matrices horizontally
-#'
-#' This function combines multiple plot matrices horizontally, centering them vertically.
-#'
-#' @param ... A list of plot matrices to be combined.
-#' @return A combined plot matrix.
-#' @export
-#' 
-cbind_plots = function(...) {
-  plots <- list(...)
-  if (any(sapply(plots, function(plot) !inherits(plot, "plotcli")))) {
-    stop("All input objects must be of class 'plotcli'")
-  }
-  max_rows <- max(sapply(plots, function(plot) nrow(plot$plot_matrix)))
-
-  # Initialize the combined plot matrix
-  combined_matrix <- matrix(" ", nrow = max_rows, ncol = 0)
-
-  for (i in seq_along(plots)) {
-    plot <- plots[[i]]
-    # Center the plot matrix vertically
-    row_offset <- floor((max_rows - nrow(plot$plot_matrix)) / 2)
-    centered_matrix <- matrix(" ", nrow = max_rows, ncol = ncol(plot$plot_matrix))
-    centered_matrix[(1 + row_offset):(nrow(plot$plot_matrix) + row_offset), ] <- plot$plot_matrix
-
-    # Remove the last endline in the first plot_matrix
-    if (i == 1) {
-      centered_matrix <- centered_matrix[, -ncol(centered_matrix)]
-    }
-
-    # Combine the centered plot matrix with the combined matrix
-    combined_matrix <- cbind(combined_matrix, centered_matrix)
-  }
-
-  return(combined_matrix)
-}
-
-#' Combine plot matrices vertically
-#'
-#' This function combines multiple plot matrices vertically, centering them horizontally.
-#'
-#' @param ... A list of plot matrices to be combined.
-#' @return A combined plot matrix.
-#' @export
-#' 
-rbind_plots = function(...) {
-  plots <- list(...)
-  if (any(sapply(plots, function(plot) !inherits(plot, "plotcli")))) {
-    stop("All input objects must be of class 'plotcli'")
-  }
-  max_cols <- max(sapply(plots, function(plot) ncol(plot$plot_matrix)))
-
-  # Initialize the combined plot matrix
-  combined_matrix <- matrix(" ", nrow = 0, ncol = max_cols)
-
-  for (plot in plots) {
-    # Center the plot matrix horizontally
-    col_offset <- floor((max_cols - ncol(plot$plot_matrix)) / 2)
-    centered_matrix <- matrix(" ", nrow = nrow(plot$plot_matrix), ncol = max_cols)
-    centered_matrix[, (1 + col_offset):(ncol(plot$plot_matrix) + col_offset)] <- plot$plot_matrix
-
-    # Combine the centered plot matrix with the combined matrix
-    combined_matrix <- rbind(combined_matrix, centered_matrix)
-  }
-
-  return(combined_matrix)
-}
-
 #' Make colored text
 #'
 #' This function applies a specified color to a given text string.
@@ -275,4 +207,28 @@ remove_color_codes <- function(s) {
 is_braille <- function(char) {
     code <- utf8ToInt(char)
     return((code >= 0x2800 && code <= 0x28FF))
+}
+
+#' Make unique names
+#'
+#' This function takes a vector of names and ensures that each name is unique by appending a number if necessary.
+#'
+#' @param names A character vector of names.
+#' @return A character vector of unique names.
+#' @export
+#' 
+#' @examples
+#' make_unique_names(c("apple", "apple", "banana", "apple"))
+make_unique_names <- function(names) {
+  unique_names <- character(length(names))
+  for (i in seq_along(names)) {
+    name <- names[i]
+    count <- 1
+    while (name %in% unique_names) {
+      name <- paste(names[i], count, sep = "_")
+      count <- count + 1
+    }
+    unique_names[i] <- name
+  }
+  return(unique_names)
 }

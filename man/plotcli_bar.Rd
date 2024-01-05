@@ -13,6 +13,7 @@ plotcli_bar(
   y_label = "y",
   color = NULL,
   braille = TRUE,
+  name = "barplot",
   ...
 )
 }
@@ -32,6 +33,8 @@ plotcli_bar(
 \item{color}{Color of the plot elements (default: NULL)}
 
 \item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "barplot")}
 
 \item{...}{Additional arguments passed to the plotcli$new() function}
 }

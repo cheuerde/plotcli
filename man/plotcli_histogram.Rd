@@ -14,6 +14,7 @@ plotcli_histogram(
   braille = FALSE,
   bin_width = NULL,
   ylim = NULL,
+  name = "histogram",
   ...
 )
 }
@@ -35,6 +36,8 @@ plotcli_histogram(
 \item{bin_width}{Width of the bins (default: NULL)}
 
 \item{ylim}{y limits (default: NULL)}
+
+\item{name}{Name of the plot element (default: "histogram")}
 
 \item{...}{Additional arguments passed to the plotcli$new() function}
 }

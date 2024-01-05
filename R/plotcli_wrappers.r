@@ -8,6 +8,7 @@
 #' @param y_label Label for the y-axis (default: "y")
 #' @param color Color of the plot elements (default: NULL)
 #' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "scatter")
 #' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
 #' 
@@ -24,6 +25,7 @@ plotcli_scatter <- function(
                             y_label = "y", 
                             color = NULL,
                             braille = TRUE,
+                            name = "scatter",
                             ...
                             ) {
 
@@ -39,7 +41,7 @@ plotcli_scatter <- function(
                       ...
                       )
 
-  data <- list(x = x, y = y, type = "scatter", color = color, braille = braille, name = "scatter")
+  data <- list(x = x, y = y, type = "scatter", color = color, braille = braille, name = name)
   plot$add_data(data)
   return(plot)
 
@@ -54,6 +56,7 @@ plotcli_scatter <- function(
 #' @param y_label Label for the y-axis (default: "Density")
 #' @param color Color of the plot elements (default: NULL)
 #' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "density")
 #' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
 #'
@@ -68,6 +71,7 @@ plotcli_density <- function(
                             y_label = "Density", 
                             color = NULL,
                             braille = TRUE,
+                            name = "density",
                             ...
                             ) {
 
@@ -83,7 +87,7 @@ plotcli_density <- function(
                       ...
                       )
 
-  data <- list(x = x, y = y, type = "line", color = color, braille = braille, name = "density")
+  data <- list(x = x, y = y, type = "line", color = color, braille = braille, name = name)
   plot$add_data(data)
   return(plot)
 
@@ -99,6 +103,7 @@ plotcli_density <- function(
 #' @param y_label Label for the y-axis (default: "y")
 #' @param color Color of the plot elements (default: NULL)
 #' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "line")
 #' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
 #'
@@ -115,6 +120,7 @@ plotcli_line <- function(
                          y_label = "y", 
                          color = NULL,
                          braille = TRUE,
+                         name = "line",
                          ...
                          ) {
 
@@ -130,7 +136,7 @@ plotcli_line <- function(
                       ...
                       )
 
-  data <- list(x = x, y = y, type = "line", color = color, braille = braille, name = "line")
+  data <- list(x = x, y = y, type = "line", color = color, braille = braille, name = name)
   plot$add_data(data)
   return(plot)
 
@@ -147,6 +153,7 @@ plotcli_line <- function(
 #' @param braille Use Braille characters for the plot (default: TRUE)
 #' @param bin_width Width of the bins (default: NULL)
 #' @param ylim y limits (default: NULL)
+#' @param name Name of the plot element (default: "histogram")
 #' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
 #'
@@ -163,6 +170,7 @@ plotcli_histogram <- function(
                               braille = FALSE,
                               bin_width = NULL,
                               ylim = NULL,
+                              name = "histogram",
                               ...
                               ) {
 
@@ -187,7 +195,7 @@ plotcli_histogram <- function(
                       ...
                       )
 
-  data <- list(x = x, y = y, type = "barplot", color = color, braille = braille, name = "histogram")
+  data <- list(x = x, y = y, type = "barplot", color = color, braille = braille, name = name)
   plot$add_data(data)
   return(plot)
 
@@ -203,6 +211,7 @@ plotcli_histogram <- function(
 #' @param y_label Label for the y-axis (default: "y")
 #' @param color Color of the plot elements (default: NULL)
 #' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "barplot")
 #' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
 #'
@@ -219,6 +228,7 @@ plotcli_bar <- function(
                         y_label = "y", 
                         color = NULL,
                         braille = TRUE,
+                        name = "barplot",
                         ...
                         ) {
 
@@ -235,7 +245,7 @@ plotcli_bar <- function(
                       )
 
 
-  data <- list(x = x, y = y, type = "barplot", color = color, braille = braille, name = "barplot")
+  data <- list(x = x, y = y, type = "barplot", color = color, braille = braille, name = name)
   plot$add_data(data)
   return(plot)
 
@@ -251,6 +261,7 @@ plotcli_bar <- function(
 #' @param y_label Label for the y-axis (default: "y")
 #' @param color Color of the plot elements (default: NULL)
 #' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "boxplot")
 #' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
 #'
@@ -265,6 +276,7 @@ plotcli_box <- function(
                      y_label = "y", 
                      color = NULL,
                      braille = TRUE,
+                     name = "boxplot",
                      ...
                      ) {
 
@@ -278,16 +290,39 @@ plotcli_box <- function(
                       )
 
   x = rep(1, length(y))
-  data <- list(x = x, y = y, type = "boxplot", color = color, braille = braille, name = "boxplot")
+  data <- list(x = x, y = y, type = "boxplot", color = color, braille = braille, name = name)
   plot$add_data(data)
   return(plot)
 
 }
 
 # short versions
+#' @title Short version of plotcli_scatter
+#' @description Short version of plotcli_scatter function.
+#' @export
 pclis <- plotcli_scatter
+
+#' @title Short version of plotcli_density
+#' @description Short version of plotcli_density function.
+#' @export
 pclid <- plotcli_density
+
+#' @title Short version of plotcli_line
+#' @description Short version of plotcli_line function.
+#' @export
 pclil <- plotcli_line
+
+#' @title Short version of plotcli_histogram
+#' @description Short version of plotcli_histogram function.
+#' @export
 pclih <- plotcli_histogram
+
+#' @title Short version of plotcli_bar
+#' @description Short version of plotcli_bar function.
+#' @export
 pclib <- plotcli_bar
+
+#' @title Short version of plotcli_box
+#' @description Short version of plotcli_box function.
+#' @export
 pclibx <- plotcli_box

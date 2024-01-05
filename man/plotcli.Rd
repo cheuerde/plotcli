@@ -131,6 +131,7 @@ plotcli$print_plot()
 \item \href{#method-plotcli-draw_colors}{\code{plotcli$draw_colors()}}
 \item \href{#method-plotcli-draw_plot}{\code{plotcli$draw_plot()}}
 \item \href{#method-plotcli-make_plot_matrix}{\code{plotcli$make_plot_matrix()}}
+\item \href{#method-plotcli-export_plot_matrix}{\code{plotcli$export_plot_matrix()}}
 \item \href{#method-plotcli-print_plot}{\code{plotcli$print_plot()}}
 \item \href{#method-plotcli-merge}{\code{plotcli$merge()}}
 \item \href{#method-plotcli-clone}{\code{plotcli$clone()}}
@@ -523,12 +524,26 @@ Make plot matrix: assembles all plot elements (canvas + borders + title + axes +
 \subsection{Method \code{make_plot_matrix()}}{
 This function assembles all plot elements (canvas + borders + title + axes + legend)
 and creates the final plot matrix.
-Main plotting function: assembles all plot elements (canvas + borders + title + axes + legend) and prints the plot
-by 'cat'ing the plot matrix to the console.
+Export plot matrix
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{plotcli$make_plot_matrix()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plotcli-export_plot_matrix"></a>}}
+\if{latex}{\out{\hypertarget{method-plotcli-export_plot_matrix}{}}}
+\subsection{Method \code{export_plot_matrix()}}{
+This function exports the plot matrix.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{plotcli$export_plot_matrix()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+The plot matrix.
+Main plotting function: assembles all plot elements (canvas + borders + title + axes + legend) and prints the plot
+by 'cat'ing the plot matrix to the console.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plotcli-print_plot"></a>}}

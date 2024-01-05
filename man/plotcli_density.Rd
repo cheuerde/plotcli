@@ -12,6 +12,7 @@ plotcli_density(
   y_label = "Density",
   color = NULL,
   braille = TRUE,
+  name = "density",
   ...
 )
 }
@@ -29,6 +30,8 @@ plotcli_density(
 \item{color}{Color of the plot elements (default: NULL)}
 
 \item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "density")}
 
 \item{...}{Additional arguments passed to the plotcli$new() function}
 }

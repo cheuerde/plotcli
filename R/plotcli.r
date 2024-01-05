@@ -397,9 +397,10 @@ plotcli <- R6Class("plotcli",
     #'
     #' @description Add legend to the plot matrix
     add_legend = function() {
+      if (!self$draw_legend) return()
       plot_matrix <- self$plot_matrix
 
-      legend_names <- unique(unlist(lapply(self$data, function(dat) dat$name)))
+      legend_names <- unlist(lapply(self$data, function(dat) dat$name))
       n_legend <- length(legend_names)
 
       # Center the legend based on nrow of plot_matrix
@@ -431,6 +432,17 @@ plotcli <- R6Class("plotcli",
           (data$type == "boxplot" & length(self$data) > 0 & !self$is_boxplot)
       ) {
         stop("boxplots cannot be combined with other types at the moment")
+      }
+
+      # if there is no name, give it a name based on the order (like data_1
+      if (is.null(data$name)) {
+        data$name <- paste("data", length(self$data) + 1, sep = "_")
+      } else {
+        # Ensure unique names
+        existing_names <- unlist(lapply(self$data, function(dat) dat$name))
+        all_names <- c(existing_names, data$name)
+        unique_names <- make_unique_names(all_names)
+        data$name <- unique_names[length(unique_names)]
       }
 
       # add matrix_colored to the data
@@ -927,6 +939,15 @@ draw_barplot_braille = function(set_idx) {
       self$add_row(bottom = TRUE)
     },
 
+    #' Export plot matrix
+    #'
+    #' @description This function exports the plot matrix.
+    #' @return The plot matrix.
+    export_plot_matrix = function() {
+      self$make_plot_matrix()
+      return(self$plot_matrix)
+    },
+
     #' Main plotting function: assembles all plot elements (canvas + borders + title + axes + legend) and prints the plot
     #' by 'cat'ing the plot matrix to the console.
     #'
@@ -964,7 +985,7 @@ draw_barplot_braille = function(set_idx) {
         ylim = if (!is.null(self$ylim) && !is.null(other$ylim)) c(min(self$ylim[1], other$ylim[1]), max(self$ylim[2], other$ylim[2])) else NULL,
         xlim = if (!is.null(self$xlim) && !is.null(other$xlim)) c(min(self$xlim[1], other$xlim[1]), max(self$xlim[2], other$xlim[2])) else NULL,
         title = if (!is.null(self$title) && !is.null(other$title)) paste(self$title, other$title, sep = " & ") else NULL,
-        draw_legend = self$draw_legend || other$draw_legend
+        draw_legend = TRUE
       )
     
       # Add combined data to the new plotcli object
@@ -976,40 +997,3 @@ draw_barplot_braille = function(set_idx) {
     }
   )
 )
-
-#' Overload the "+" operator for plotcli objects
-#'
-#' This function overloads the "+" operator to merge two plotcli objects.
-#'
-#' @param plot1 A plotcli object to be merged.
-#' @param plot2 A plotcli object to be merged.
-#' @return A new plotcli object containing the combined data from both objects.
-`+.plotcli` <- function(plot1, plot2) {
-  return(plot1$merge(plot2))
-}
-
-#' Combine two plotcli objects horizontally
-#'
-#' This function combines two plotcli objects horizontally, centering them vertically.
-#'
-#' @param plot1 A plotcli object to be combined.
-#' @param plot2 A plotcli object to be combined.
-#' @return A combined plot matrix.
-cbind.plotcli = function(plot1, plot2) {
-  # Call the cbind_plots function with the plotcli objects
-  combined_matrix <- cbind_plots(plot1, plot2)
-  return(combined_matrix)
-}
-
-#' Combine two plotcli objects vertically
-#'
-#' This function combines two plotcli objects vertically, centering them horizontally.
-#'
-#' @param plot1 A plotcli object to be combined.
-#' @param plot2 A plotcli object to be combined.
-#' @return A combined plot matrix.
-rbind.plotcli = function(plot1, plot2) {
-  # Call the rbind_plots function with the plotcli objects
-  combined_matrix <- rbind_plots(plot1, plot2)
-  return(combined_matrix)
-}
