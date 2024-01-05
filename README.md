@@ -1,5 +1,7 @@
 # plotcli: Command-Line Plots for R
 
+![Colored Density Plot on Terminal](docs/boxplot.jpg)
+
 ![Colored Density Plot on Terminal](docs/density.jpg)
 
 plotcli is an R package that brings the power of command-line plotting to your R environment. 
