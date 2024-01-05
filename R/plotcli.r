@@ -921,8 +921,8 @@ draw_barplot_braille = function(set_idx) {
       self$add_x_ticks()
       self$add_x_label()
       if(self$draw_legend) self$add_legend()
-      #self$add_col()
-      #self$add_col()
+      self$add_col()
+      self$add_col()
       self$add_row()
       self$add_row(bottom = TRUE)
     },
