@@ -23,7 +23,7 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 }
 
 # Install plotcli from GitHub
-devtools::install_github("yourusername/plotcli")
+devtools::install_github("cheuerde/plotcli")
 ```
 
 ## Usage
@@ -49,4 +49,4 @@ Check the vignettes for all possible ways of using the package.
 
 ## License
 
-`plotcli`` is released under the MIT License.
+`plotcli` is released under the MIT License.
