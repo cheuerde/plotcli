@@ -2,8 +2,6 @@
 
 ![Colored Density Plot on Terminal](docs/boxplot.jpg)
 
-![Colored Density Plot on Terminal](docs/density.jpg)
-
 plotcli is an R package that brings the power of command-line plotting to your R environment. 
 With a simple and intuitive R6 class interface, plotcli allows you to create and customize a 
 variety of plot types, such as scatter, line, bar, and box plots, directly in your console. 
@@ -86,6 +84,14 @@ ggplotcli(p, braille = FALSE)
 ```
 
 Check the vignettes for all possible ways of using the package.
+
+## Showcase
+
+![Colored Density Plot on Terminal](docs/scatter.jpg)
+![Colored Density Plot on Terminal](docs/density_raw.jpg)
+![Colored Density Plot on Terminal](docs/regression.jpg)
+![Colored Density Plot on Terminal](docs/hist.jpg)
+![Colored Density Plot on Terminal](docs/pca.jpg)
 
 ## Similar Projects
 
