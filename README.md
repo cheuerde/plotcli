@@ -1,7 +1,5 @@
 # plotcli: Command-Line Plots for R
 
-!License: MIT
-
 plotcli is an R package that brings the power of command-line plotting to your R environment. With a simple and intuitive R6 class interface, plotcli allows you to create and customize a variety of plot types, such as scatter, line, bar, and box plots, directly in your console. Say goodbye to the hassle of setting up complex graphics devices and embrace the simplicity of plotcli.
 Features
 
