@@ -1,5 +1,57 @@
 # plotcli: Command-Line Plots for R
 
+```r
+> ggplotcli(ggplot(iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + geom_boxplot())
+
+                                                                                                             
+                    ┌────────────────────────────────────────────────────────────────────────────────┐       
+                4.4 │          ───────                                                               │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                                  │       
+                    │             │                                                 ───────          │       
+                3.8 │             │                                                    │             │       
+                    │         ┌───────┐                                                │             │       
+                    │         │       │                                                │             │       
+                    │         │       │                                                │             │       
+                    │         │       │                                                │             │       
+                    │         │       │                                                │             │       
+                    │         │───────│                  ───────                       │             │       
+                    │         │       │                     │                          │             │       
+                    │         │       │                     │                          │             │   setosa   
+Sepal.Length    3.2 │         └───────┘                     │                      ┌───────┐         │   versicolor   
+                    │             │                         │                      │       │         │   virginica   
+                    │             │                         │                      │       │         │       
+                    │             │                     ┌───────┐                  │───────│         │       
+                    │             │                     │       │                  │       │         │       
+                    │          ───────                  │       │                  │       │         │       
+                    │                                   │       │                  │       │         │       
+                    │                                   │───────│                  └───────┘         │       
+                    │                                   │       │                      │             │       
+                    │                                   │       │                      │             │       
+                2.6 │                                   │       │                      │             │       
+                    │                                   │       │                      │             │       
+                    │                                   └───────┘                      │             │       
+                    │                                       │                          │             │       
+                    │                                       │                          │             │       
+                    │             *                         │                          │             │       
+                    │                                       │                          │             │       
+                    │                                       │                       ───────          │       
+                    │                                       │                                        │       
+                    │                                       │                                        │       
+                2.0 │                                    ───────                                     │       
+                    └────────────────────────────────────────────────────────────────────────────────┘       
+                                                                                                             
+                               setosa                  versicolor                  virginica                 
+                                                                                                             
+                                                       Sepal.Width      
+```
+
 plotcli is an R package that brings the power of command-line plotting to your R environment. With a simple and intuitive R6 class interface, plotcli allows you to create and customize a variety of plot types, such as scatter, line, bar, and box plots, directly in your console. Say goodbye to the hassle of setting up complex graphics devices and embrace the simplicity of plotcli.
 Features
 
