@@ -2,7 +2,10 @@
 
 ![Colored Density Plot on Terminal](docs/density.jpg)
 
-plotcli is an R package that brings the power of command-line plotting to your R environment. With a simple and intuitive R6 class interface, plotcli allows you to create and customize a variety of plot types, such as scatter, line, bar, and box plots, directly in your console. Say goodbye to the hassle of setting up complex graphics devices and embrace the simplicity of plotcli.
+plotcli is an R package that brings the power of command-line plotting to your R environment. 
+With a simple and intuitive R6 class interface, plotcli allows you to create and customize a 
+variety of plot types, such as scatter, line, bar, and box plots, directly in your console. 
+
 Features
 
 - Convert `ggplot2` objects to colored terminal plots with `ggplotcli`
@@ -11,6 +14,8 @@ Features
 - Customizable plot elements: title, axis labels, ticks, and legend
 - Braille character support for high-resolution plots
 - Convenience wrappers for most frequently used functions
+
+`plotcli` is heavily inspired by the excellent [UnicodePlots.jl](https://github.com/JuliaPlots/UnicodePlots.jl) library.
 
 
 ```r
@@ -79,6 +84,13 @@ ggplotcli(p, braille = FALSE)
 ```
 
 Check the vignettes for all possible ways of using the package.
+
+## Similar Projects
+
+ - [txtplot](https://github.com/bbnkmp/txtplot/): The OG in R
+ - [r-plot](https://github.com/geotheory/r-plot): Collection of excellent terminal plotting functions
+ - [UnicodePlots.jl](https://github.com/JuliaPlots/UnicodePlots.jl): The gold standard for terminal graphics
+ - [plotext](https://github.com/piccolomo/plotext): Powerful terminal graphics in python
 
 ## License
 
