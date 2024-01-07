@@ -21,8 +21,8 @@ jobs:
 
     - name: Install plotcli
       run: |
-        Rscript -e 'if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")' && \
-        Rscript -e 'devtools::install_github("cheuerde/plotcli")'
+        Rscript -e 'if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")' && \
+        Rscript -e 'remotes::install_github("cheuerde/plotcli")'
 
     - name: Install pandoc
       run: sudo apt update && sudo apt install -y pandoc
