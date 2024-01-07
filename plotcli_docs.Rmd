@@ -5,7 +5,7 @@ output: html_document
 
 # Introduction
 
-[plotcli](file:///Users/cheuer/Library/CloudStorage/OneDrive-Bayer/GIT_Private/plotcli/vignettes/plotcli_class.Rmd#2%2C22-2%2C22) is an R package that provides terminal-based plotting in R. It supports colored scatter plots, line plots, bar plots, and box plots. This documentation will guide you through the usage of [plotcli](file:///Users/cheuer/Library/CloudStorage/OneDrive-Bayer/GIT_Private/plotcli/vignettes/plotcli_class.Rmd#2%2C22-2%2C22) functions with examples.
+[plotcli](https://github.com/cheuerde/plotcli/blob/main/vignettes/plotcli_class.Rmd) is an R package that provides terminal-based plotting in R. It supports colored scatter plots, line plots, bar plots, and box plots. This documentation will guide you through the usage of [plotcli](file:///Users/cheuer/Library/CloudStorage/OneDrive-Bayer/GIT_Private/plotcli/vignettes/plotcli_class.Rmd#2%2C22-2%2C22) functions with examples.
 
 # Examples
 
