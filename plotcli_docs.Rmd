@@ -27,7 +27,7 @@ plotcli_histogram(sample_data, color = "yellow")
 ## Line Plot
 
 ```{r}
-x <- seq(0, 2pi, length.out = 50)
+x <- seq(0, 2*pi, length.out = 50)
 y <- sin(x)
 plotcli_line(x = x, y = cos(y), color = "green")
 plotcli_line(x = x, y = x, color = "magenta", braille = FALSE)
