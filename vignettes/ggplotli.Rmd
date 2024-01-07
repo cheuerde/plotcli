@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 
 ```{r}
 library(plotcli)  
-library(ggplot2)  
 
 mtcars$cf = as.character(mtcars$cyl)
 
