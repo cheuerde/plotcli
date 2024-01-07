@@ -33,7 +33,7 @@ jobs:
       run: sudo apt update && sudo apt install -y pandoc
 
     - name: Render RMarkdown to HTML
-      run: Rscript -e 'rmarkdown::render("plotcli_docs.Rmd")'
+      run: Rscript -e 'rmarkdown::render("plotcli_docs.Rmd", output_file = "index.html")'
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
