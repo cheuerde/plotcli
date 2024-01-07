@@ -25,7 +25,7 @@ jobs:
     - name: Install plotcli
       env:
         GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      run: Rscript -e 'Sys.setenv(GITHUB_PAT = Sys.getenv("GITHUB_PAT")); remotes::install_github("your-username/plotcli", upgrade = "never")'
+      run: Rscript -e 'Sys.setenv(GITHUB_PAT = Sys.getenv("GITHUB_PAT")); remotes::install_github("cheuerde/plotcli", upgrade = "never")'
   
 
 
