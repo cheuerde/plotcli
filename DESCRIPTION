@@ -1,0 +1,21 @@
+Package: plotcli
+Type: Package
+Title: Command Line Interface Plotting in R
+Version: 0.1.0
+Date: 2024-01-01
+Author: Claas Heuer
+Maintainer: Your Name <claasheuer@gmail.com>
+Description: The plotcli package provides terminal-based plotting in R.
+             It supports colored scatter plots, 
+             line plots, bar plots, and box plots. The package allows users 
+             to customize plot appearance, add titles, labels, ticks, 
+             and legends, and output the plot as a text-based visualization.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr
+Depends: R6, utils, crayon, stringr, ggplot2, knitr, rmarkdown
+Imports: rlang
+Suggests:
+    ggplot2
+RoxygenNote: 7.2.3

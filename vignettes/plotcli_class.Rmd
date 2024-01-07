@@ -1,0 +1,121 @@
+---
+title: "Vignette For plotcli R6 class usage"
+author: "Claas Heuer"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette plotcli_class}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Using plotcli R6 class 
+
+# Setting up a scatter plot with two data sets
+
+```{r}
+library(plotcli)  
+
+plot_width = 80
+plot_height = 40
+
+# Create some example data
+x <- seq(0, 2 * pi, length.out = 100)
+y1 <- sin(x)
+y2 <- cos(x)
+
+data_1 = list(
+              x = x, 
+              y = y1, 
+              name = "y1 = sin(x)", 
+              color = "blue",
+              type = "line",
+              braille = FALSE
+              )
+
+data_2 = list(
+                x = x, 
+                y = y2, 
+                name = "y2 = cos(x)", 
+                color = "red",
+                type = "line",
+                braille = FALSE
+                )
+
+# Create a plotcli object with specified dimensions
+plot <- plotcli$new(
+                    plot_width = plot_width, 
+                    plot_height = plot_height, 
+                    x_label = "X-axis", 
+                    y_label = "Y-axis"
+                    )
+
+# Add data sets to the plot
+plot$add_data(data_1)
+plot$add_data(data_2)
+
+# Print the plot
+plot$print_plot()
+```
+
+# Combining Ascii and braille characters
+
+plotcli can use braille characters for plotting scatter
+and line plots, which give a much higher resolution on supported terminals.
+Whether to use braille or ascii characters can be specified for each data set.
+
+```{r}
+library(plotcli)  
+
+data(mtcars)
+
+# Fit a linear model
+lm_fit <- lm(wt ~ mpg, data = mtcars)
+
+# Create a new dataset with the predicted values
+predicted_data <- data.frame(mpg = mtcars$mpg, predicted_wt = predict(lm_fit, mtcars))
+
+# we use braille characters for the regression line
+data_1 = list(
+              x = predicted_data$mpg, 
+              y = predicted_data$predicted_wt, 
+              name = "Regression Line", 
+              color = "red",
+              type = "line",
+              braille = TRUE
+              )
+
+# and ascii characters for the raw data
+data_2 = list(
+                x = mtcars$mpg, 
+                y = mtcars$wt, 
+                name = "Data Points", 
+                color = "blue",
+                type = "scatter",
+                braille = FALSE
+                )
+
+# Create a plotcli object
+plot_width = 80
+plot_height = 40
+plot_obj <- plotcli$new(
+                        plot_width, 
+                        plot_height, 
+                        x_label = "Miles per Gallon", 
+                        y_label = "Weight"
+                        )
+
+# Add raw data and regression line
+plot_obj$add_data(data_1)
+plot_obj$add_data(data_2)
+
+# Print the plot
+plot_obj$print_plot()
+```
