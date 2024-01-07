@@ -19,6 +19,9 @@ jobs:
     - name: Install rmarkdown
       run: Rscript -e 'install.packages("rmarkdown")'
 
+    - name: Install plotcli
+      run: Rscript -e 'remotes::install_github("cheuerde/plotcli")'
+
     - name: Install pandoc
       run: sudo apt update && sudo apt install -y pandoc
 
