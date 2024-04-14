@@ -70,8 +70,8 @@
 #'
 plotcli <- R6Class("plotcli",
   public = list(
-    plot_width = 60,
-    plot_height = 20,
+    plot_width = getOption("plotcli.plot_width", 80),
+    plot_height = getOption("plotcli.plot_height", 40),
     plot_canvas = NULL,
     plot_matrix = NULL,
     data = NULL,
@@ -447,7 +447,7 @@ plotcli <- R6Class("plotcli",
 
       # add matrix_colored to the data
       data$matrix_colored <- list()
-      if (is.null(data$braille)) data$braille <- FALSE
+      if (is.null(data$braille)) data$braille <- getOption("plotcli.braille", TRUE)
 
       if (is.null(self$data)) {
         self$data <- list(data)

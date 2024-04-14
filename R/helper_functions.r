@@ -232,3 +232,17 @@ make_unique_names <- function(names) {
   }
   return(unique_names)
 }
+
+#' Set global options for plotcli
+#'
+#' @param plot_width Default plot width (default: 80)
+#' @param plot_height Default plot height (default: 40)
+#' @param braille Default braille setting (default: TRUE)
+#' @export
+plotcli_options <- function(plot_width = 60, plot_height = 20, braille = FALSE) {
+  options(
+    plotcli.plot_width = plot_width,
+    plotcli.plot_height = plot_height,
+    plotcli.braille = braille
+  )
+}

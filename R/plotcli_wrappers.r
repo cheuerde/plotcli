@@ -19,12 +19,12 @@
 plotcli_scatter <- function(
                             y,
                             x = NULL, 
-                            plot_width = 80, 
-                            plot_height = 40, 
+                            plot_width = getOption("plotcli.plot_width", 80),
+                            plot_height = getOption("plotcli.plot_height", 40),
                             x_label = "x", 
                             y_label = "y", 
                             color = NULL,
-                            braille = TRUE,
+                            braille = getOption("plotcli.braille", TRUE),
                             name = "scatter",
                             ...
                             ) {
@@ -65,12 +65,12 @@ plotcli_scatter <- function(
 #' plotcli_density(x)
 plotcli_density <- function(
                             x, 
-                            plot_width = 80, 
-                            plot_height = 40, 
+                            plot_width = getOption("plotcli.plot_width", 80),
+                            plot_height = getOption("plotcli.plot_height", 40),
                             x_label = "x", 
                             y_label = "Density", 
                             color = NULL,
-                            braille = TRUE,
+                            braille = getOption("plotcli.braille", TRUE),
                             name = "density",
                             ...
                             ) {
@@ -114,12 +114,12 @@ plotcli_density <- function(
 plotcli_line <- function(
                          y, 
                          x = NULL,
-                         plot_width = 80, 
-                         plot_height = 40, 
+                         plot_width = getOption("plotcli.plot_width", 80),
+                         plot_height = getOption("plotcli.plot_height", 40),
                          x_label = "x", 
                          y_label = "y", 
                          color = NULL,
-                         braille = TRUE,
+                         braille = getOption("plotcli.braille", TRUE),
                          name = "line",
                          ...
                          ) {
@@ -162,12 +162,12 @@ plotcli_line <- function(
 #' plotcli_histogram(x)
 plotcli_histogram <- function(
                               x, 
-                              plot_width = 80, 
-                              plot_height = 40, 
+                              plot_width = getOption("plotcli.plot_width", 80),
+                              plot_height = getOption("plotcli.plot_height", 40),
                               x_label = "x", 
                               y_label = "Frequency", 
                               color = NULL,
-                              braille = FALSE,
+                              braille = getOption("plotcli.braille", TRUE),
                               bin_width = NULL,
                               ylim = NULL,
                               name = "histogram",
@@ -222,12 +222,12 @@ plotcli_histogram <- function(
 plotcli_bar <- function(
                         y, 
                         x = NULL,
-                        plot_width = 80, 
-                        plot_height = 40, 
+                        plot_width = getOption("plotcli.plot_width", 80),
+                        plot_height = getOption("plotcli.plot_height", 40),
                         x_label = "x", 
                         y_label = "y", 
                         color = NULL,
-                        braille = TRUE,
+                        braille = getOption("plotcli.braille", TRUE),
                         name = "barplot",
                         ...
                         ) {
@@ -270,12 +270,12 @@ plotcli_bar <- function(
 #' plotcli_box(y)
 plotcli_box <- function(
                      y, 
-                     plot_width = 80, 
-                     plot_height = 40, 
+                     plot_width = getOption("plotcli.plot_width", 80),
+                     plot_height = getOption("plotcli.plot_height", 40),
                      x_label = "x", 
                      y_label = "y", 
                      color = NULL,
-                     braille = TRUE,
+                     braille = getOption("plotcli.braille", TRUE),
                      name = "boxplot",
                      ...
                      ) {

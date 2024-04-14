@@ -6,12 +6,12 @@
 \usage{
 plotcli_histogram(
   x,
-  plot_width = 80,
-  plot_height = 40,
+  plot_width = getOption("plotcli.plot_width", 80),
+  plot_height = getOption("plotcli.plot_height", 40),
   x_label = "x",
   y_label = "Frequency",
   color = NULL,
-  braille = FALSE,
+  braille = getOption("plotcli.braille", TRUE),
   bin_width = NULL,
   ylim = NULL,
   name = "histogram",
