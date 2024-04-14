@@ -6,12 +6,12 @@
 \usage{
 plotcli_box(
   y,
-  plot_width = 80,
-  plot_height = 40,
+  plot_width = getOption("plotcli.plot_width", 80),
+  plot_height = getOption("plotcli.plot_height", 40),
   x_label = "x",
   y_label = "y",
   color = NULL,
-  braille = TRUE,
+  braille = getOption("plotcli.braille", TRUE),
   name = "boxplot",
   ...
 )
