@@ -4,14 +4,14 @@
 \alias{plotcli_options}
 \title{Set global options for plotcli}
 \usage{
-plotcli_options(plot_width = 80, plot_height = 40, braille = TRUE)
+plotcli_options(plot_width = 60, plot_height = 20, braille = FALSE)
 }
 \arguments{
-\item{plot_width}{Default plot width (default: 80)}
+\item{plot_width}{Default plot width (default: 60)}
 
-\item{plot_height}{Default plot height (default: 40)}
+\item{plot_height}{Default plot height (default: 20)}
 
-\item{braille}{Default braille setting (default: TRUE)}
+\item{braille}{Default braille setting (default: FALSE)}
 }
 \description{
 Set global options for plotcli

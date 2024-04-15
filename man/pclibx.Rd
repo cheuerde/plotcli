@@ -16,6 +16,31 @@ pclibx(
   ...
 )
 }
+\arguments{
+\item{y}{A list of numeric vectors of values}
+
+\item{plot_width}{Width of the plot (default: 80)}
+
+\item{plot_height}{Height of the plot (default: 40)}
+
+\item{x_label}{Label for the x-axis (default: "x")}
+
+\item{y_label}{Label for the y-axis (default: "y")}
+
+\item{color}{Color of the plot elements (default: NULL)}
+
+\item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "boxplot")}
+
+\item{...}{Additional arguments passed to the plotcli$new() function}
+
+\item{x}{A vector of categories}
+}
 \description{
 Short version of plotcli_box function.
+}
+\examples{
+y <- rnorm(50, mean = 0)
+pclib(y)
 }

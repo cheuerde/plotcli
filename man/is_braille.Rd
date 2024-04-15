@@ -16,6 +16,5 @@ A boolean value indicating whether the character is a Braille character or not.
 This function checks if a given character is a Braille character.
 }
 \examples{
-is_braille("⠋")
 is_braille("A")
 }

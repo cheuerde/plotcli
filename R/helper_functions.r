@@ -202,7 +202,6 @@ remove_color_codes <- function(s) {
 #' @export
 #' 
 #' @examples
-#' is_braille("⠋")
 #' is_braille("A")
 is_braille <- function(char) {
     code <- utf8ToInt(char)

@@ -4,7 +4,7 @@ author: "Claas Heuer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette plotcli_class}
+  %\VignetteIndexEntry{Vignette plotcli wrappers}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

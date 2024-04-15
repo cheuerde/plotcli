@@ -17,6 +17,32 @@ pclib(
   ...
 )
 }
+\arguments{
+\item{y}{A numeric vector of values}
+
+\item{x}{A vector of categories}
+
+\item{plot_width}{Width of the plot (default: 80)}
+
+\item{plot_height}{Height of the plot (default: 40)}
+
+\item{x_label}{Label for the x-axis (default: "x")}
+
+\item{y_label}{Label for the y-axis (default: "y")}
+
+\item{color}{Color of the plot elements (default: NULL)}
+
+\item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "barplot")}
+
+\item{...}{Additional arguments passed to the plotcli$new() function}
+}
 \description{
 Short version of plotcli_bar function.
+}
+\examples{
+x <- 1:5
+y <- c(10, 15, 8, 12, 6)
+pclib(x, y)
 }

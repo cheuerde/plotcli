@@ -17,6 +17,32 @@ pclis(
   ...
 )
 }
+\arguments{
+\item{y}{A numeric vector of y values}
+
+\item{x}{A numeric vector of x values}
+
+\item{plot_width}{Width of the plot (default: 80)}
+
+\item{plot_height}{Height of the plot (default: 40)}
+
+\item{x_label}{Label for the x-axis (default: "x")}
+
+\item{y_label}{Label for the y-axis (default: "y")}
+
+\item{color}{Color of the plot elements (default: NULL)}
+
+\item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "scatter")}
+
+\item{...}{Additional arguments passed to the plotcli$new() function}
+}
 \description{
 Short version of plotcli_scatter function.
+}
+\examples{
+x <- rnorm(100)
+y <- rnorm(100)
+pclis(x, y)
 }
