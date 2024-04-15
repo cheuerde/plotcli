@@ -171,12 +171,6 @@ plotcli <- R6Class("plotcli",
 
     #' @description Add borders to the plot matrix
     add_borders = function() {
-      horiz_border_char <- "─"
-      vert_border_char <- "│"
-      top_left_corner_char <- "┌"
-      top_right_corner_char <- "┐"
-      bottom_left_corner_char <- "└"
-      bottom_right_corner_char <- "┘"
 
       plot_matrix <- self$plot_matrix
 
@@ -704,7 +698,7 @@ plotcli <- R6Class("plotcli",
 
       for (i in 1:length(x)) {
         for (j in 1:y_norm[i]) {
-          plot_canvas[nrow(plot_canvas) - j + 1, x_norm[i]] <- "█"
+          plot_canvas[nrow(plot_canvas) - j + 1, x_norm[i]] <- full_block_char
           self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- 
             list(row = nrow(plot_canvas) - j + 1, col = x_norm[i])
         }
@@ -793,8 +787,8 @@ draw_barplot_braille = function(set_idx) {
       box_right <- x_center + 4 # Adjust the right position to create a wider box
 
       # Draw vertical lines
-      plot_canvas[box_top:(stats_norm[5] - stats_norm[4] + box_top), x_center] <- "│"
-      plot_canvas[box_bottom:(box_bottom - (stats_norm[2] - stats_norm[1])), x_center] <- "│"
+      plot_canvas[box_top:(stats_norm[5] - stats_norm[4] + box_top), x_center] <- box_vert_char
+      plot_canvas[box_bottom:(box_bottom - (stats_norm[2] - stats_norm[1])), x_center] <- box_vert_char
 
       self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <-
         list(row = box_bottom:(box_bottom - (stats_norm[2] - stats_norm[1])), col = x_center)
@@ -804,7 +798,7 @@ draw_barplot_braille = function(set_idx) {
 
       # Draw horizontal lines
       for (i in 1:5) {
-        plot_canvas[nrow(plot_canvas) - stats_norm[i] + 1, (box_left + 1):(box_right - 1)] <- "─"
+        plot_canvas[nrow(plot_canvas) - stats_norm[i] + 1, (box_left + 1):(box_right - 1)] <- box_horiz_char
         # Add colored matrix elements for horizontal lines
         for (col_idx in (box_left + 1):(box_right - 1)) {
           self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = nrow(plot_canvas) - stats_norm[i] + 1, col = col_idx)
@@ -812,15 +806,15 @@ draw_barplot_braille = function(set_idx) {
       }
 
       # Draw corners
-      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_left] <- "┌"
-      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_right] <- "┐"
-      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_left] <- "└"
-      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_right] <- "┘"
+      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_left] <- box_top_left_corner_char
+      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_right] <- box_top_right_corner_char
+      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_left] <- box_bottom_left_corner_char
+      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_right] <- box_bottom_right_corner_char
 
-      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_left] <- "└"
-      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_right] <- "┘"
-      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_left] <- "┌"
-      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_right] <- "┐"
+      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_left] <- box_bottom_left_corner_char
+      plot_canvas[nrow(plot_canvas) - stats_norm[2] + 1, box_right] <- box_bottom_right_corner_char
+      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_left] <- box_top_left_corner_char
+      plot_canvas[nrow(plot_canvas) - stats_norm[4] + 1, box_right] <- box_top_right_corner_char
 
       # Add colored matrix elements for corners
       self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = nrow(plot_canvas) - stats_norm[2] + 1, col = box_left)
@@ -829,8 +823,8 @@ draw_barplot_braille = function(set_idx) {
       self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = nrow(plot_canvas) - stats_norm[4] + 1, col = box_right)
 
       for (i in (stats_norm[4] - 2):(stats_norm[2])) {
-        plot_canvas[nrow(plot_canvas) - i + 0, box_left] <- "│"
-        plot_canvas[nrow(plot_canvas) - i + 0, box_right] <- "│"
+        plot_canvas[nrow(plot_canvas) - i + 0, box_left] <- box_vert_char
+        plot_canvas[nrow(plot_canvas) - i + 0, box_right] <- box_vert_char
         # Add colored matrix elements for vertical lines
         self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = nrow(plot_canvas) - i + 0, col = box_left)
         self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = nrow(plot_canvas) - i + 0, col = box_right)
