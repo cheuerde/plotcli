@@ -1,0 +1,34 @@
+---
+title: "plotcli Documentation"
+output: html_document
+---
+
+# Introduction
+
+[plotcli](https://github.com/cheuerde/plotcli/blob/main/vignettes/plotcli_class.Rmd) is an R package that provides terminal-based plotting in R. It supports colored scatter plots, line plots, bar plots, and box plots. This documentation will guide you through the usage of [plotcli](file:///Users/cheuer/Library/CloudStorage/OneDrive-Bayer/GIT_Private/plotcli/vignettes/plotcli_class.Rmd#2%2C22-2%2C22) functions with examples.
+
+# Examples
+
+## Density Plot
+
+```{r}
+library(plotcli)
+sample_data <- rnorm(1000, mean = 5, sd = 2)
+plotcli_density(sample_data, color = "blue", braille = TRUE)
+```
+
+## Histogram
+
+```{r}
+sample_data <- rnorm(1000, mean = 5, sd = 2)
+plotcli_histogram(sample_data, color = "yellow")
+```
+
+## Line Plot
+
+```{r}
+x <- seq(0, 2*pi, length.out = 50)
+y <- sin(x)
+plotcli_line(x = x, y = cos(y), color = "green")
+plotcli_line(x = x, y = x, color = "magenta", braille = FALSE)
+```

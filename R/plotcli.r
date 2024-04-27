@@ -57,7 +57,6 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Create a new plotcli object
 #' plotcli <- plotcli$new()
 #'
@@ -66,7 +65,6 @@
 #'
 #' # Print the plot
 #' plotcli$print_plot()
-#' }
 #'
 plotcli <- R6Class("plotcli",
   public = list(
