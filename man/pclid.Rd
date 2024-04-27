@@ -16,6 +16,29 @@ pclid(
   ...
 )
 }
+\arguments{
+\item{x}{A numeric vector of values}
+
+\item{plot_width}{Width of the plot (default: 80)}
+
+\item{plot_height}{Height of the plot (default: 40)}
+
+\item{x_label}{Label for the x-axis (default: "x")}
+
+\item{y_label}{Label for the y-axis (default: "Density")}
+
+\item{color}{Color of the plot elements (default: NULL)}
+
+\item{braille}{Use Braille characters for the plot (default: TRUE)}
+
+\item{name}{Name of the plot element (default: "density")}
+
+\item{...}{Additional arguments passed to the plotcli$new() function}
+}
 \description{
 Short version of plotcli_density function.
+}
+\examples{
+x <- rnorm(100)
+pclid(x)
 }

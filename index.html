@@ -369,45 +369,36 @@ pre code {
 <h2>Density Plot</h2>
 <pre class="r"><code>library(plotcli)</code></pre>
 <pre><code>## Loading required package: R6</code></pre>
-<pre><code>## Loading required package: crayon</code></pre>
-<pre><code>## Loading required package: stringr</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
-<pre><code>## 
-## Attaching package: &#39;ggplot2&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:crayon&#39;:
-## 
-##     %+%</code></pre>
-<pre><code>## Loading required package: knitr</code></pre>
-<pre><code>## Loading required package: rmarkdown</code></pre>
 <pre><code>## plotcli loaded. Use plotcli_options() to set global options.</code></pre>
 <pre class="r"><code>sample_data &lt;- rnorm(1000, mean = 5, sd = 2)
 plotcli_density(sample_data, color = &quot;blue&quot;, braille = TRUE)</code></pre>
 <pre><code>## 
 ##                                                                                 
 ##                  ┌────────────────────────────────────────────────────────────┐ 
-##              0.2 │                         ⡳⡤⡔⡤⡔⡤⡔⡤⢕⠢                         │ 
-##                  │                        ⡰⠣        ⢅⠢                        │ 
-##                  │                        ⠷          ⢅                        │ 
-##                  │                       ⡣            ⢤                       │ 
-##                  │                      ⡐⠣            ⠰⡵                      │ 
-##              0.1 │                      ⠷              ⠰⡗                     │ 
-##                  │                     ⡥⠑               ⡀⠗                    │ 
-##                  │                    ⢁⠣                 ⡒⠢                   │ 
-##                  │                   ⡐⠥                   ⠧                   │ 
-##   Density    0.1 │                   ⠹                    ⡠⠤                  │ 
-##                  │                  ⡕                      ⡄                  │ 
-##                  │                 ⡱⠒                      ⡀⠕                 │ 
-##                  │                ⠰⠧                        ⡴                 │ 
-##                  │               ⠰⡗                          ⡥                │ 
-##              0.0 │              ⠰⡙                           ⡀⠸               │ 
-##                  │             ⢅⡕                             ⡐⢖              │ 
-##                  │           ⢁⡨⠓                                ⡵⢈            │ 
-##                  │         ⡐⡸⠕                                   ⠰⡕⢗⡊         │ 
-##                  │       ⢁⢘⠵                                        ⡐⡔⢗⡨      │ 
-##              0.0 │⣨⣈⢨⣈⢨⡷⡔⠕                                             ⡐⡔⢶⢨⣈⢨⠬│ 
+##              0.2 │                           ⢁⡷⡔⡤⡤⠦                           │ 
+##                  │                          ⢇⠔    ⢃                           │ 
+##                  │                        ⢐⡧⠑      ⡥                          │ 
+##                  │                       ⢃⠴        ⡀⠖                         │ 
+##                  │                      ⢀⠓          ⡣                         │ 
+##              0.1 │                     ⠰⠶           ⠰⠖                        │ 
+##                  │                     ⠷             ⡒⠢                       │ 
+##                  │                    ⡰⠢              ⡅                       │ 
+##                  │                   ⠰⠶               ⡠⠢                      │ 
+##   Density    0.1 │                   ⠵                 ⡅                      │ 
+##                  │                  ⡰⠣                 ⡀⠖                     │ 
+##                  │                 ⠰⠶                   ⡴                     │ 
+##                  │                 ⠷                     ⢅                    │ 
+##                  │                ⡱⠒                     ⠰⡷                   │ 
+##              0.0 │               ⡰⠥                       ⠰⡤⡪                 │ 
+##                  │              ⡰⠷                          ⡀⢄⠦               │ 
+##                  │             ⢃⠴                             ⡔⠦              │ 
+##                  │            ⡷⠔                               ⡓⠨             │ 
+##                  │          ⡰⡪⠑                                 ⡃⢗            │ 
+##              0.0 │⣨⣈⢨⣈⢨⣈⢨⢪⢨⡦⠤                                     ⡥⡔⡕⡴⢪⣈⢨⣈⢨⣈⢨⠬│ 
 ##                  └────────────────────────────────────────────────────────────┘ 
 ##                                                                                 
-##                   -2.2           1.3           4.8            8.3         11.8  
+##                   -2.7           1.2           5.2            9.1         13.0  
 ##                                                                                 
 ##                                                x                                
 ## </code></pre>
@@ -419,29 +410,29 @@ plotcli_histogram(sample_data, color = &quot;yellow&quot;)</code></pre>
 <pre><code>## 
 ##                                                                                   
 ##                    ┌────────────────────────────────────────────────────────────┐ 
-##                208 │                            █                               │ 
-##                    │                            █   █                           │ 
-##                    │                            █   █                           │ 
-##                    │                            █   █                           │ 
-##                    │                       █    █   █                           │ 
-##                156 │                       █    █   █    █                      │ 
-##                    │                       █    █   █    █                      │ 
-##                    │                       █    █   █    █                      │ 
-##                    │                       █    █   █    █                      │ 
-##   Frequency    104 │                  █    █    █   █    █                      │ 
-##                    │                  █    █    █   █    █                      │ 
-##                    │                  █    █    █   █    █    █                 │ 
-##                    │                  █    █    █   █    █    █                 │ 
-##                    │                  █    █    █   █    █    █                 │ 
-##               52.0 │                  █    █    █   █    █    █                 │ 
-##                    │                  █    █    █   █    █    █   █             │ 
-##                    │              █   █    █    █   █    █    █   █             │ 
-##                    │         █    █   █    █    █   █    █    █   █    █        │ 
-##                    │         █    █   █    █    █   █    █    █   █    █        │ 
-##                0.0 │█    █   █    █   █    █    █   █    █    █   █    █   █   █│ 
+##                205 │                           █                                │ 
+##                    │                           █     █                          │ 
+##                    │                           █     █                          │ 
+##                    │                           █     █                          │ 
+##                    │                           █     █                          │ 
+##                154 │                      █    █     █                          │ 
+##                    │                      █    █     █    █                     │ 
+##                    │                      █    █     █    █                     │ 
+##                    │                      █    █     █    █                     │ 
+##   Frequency    102 │                      █    █     █    █                     │ 
+##                    │                █     █    █     █    █     █               │ 
+##                    │                █     █    █     █    █     █               │ 
+##                    │                █     █    █     █    █     █               │ 
+##                    │                █     █    █     █    █     █    █          │ 
+##               51.2 │           █    █     █    █     █    █     █    █          │ 
+##                    │           █    █     █    █     █    █     █    █          │ 
+##                    │           █    █     █    █     █    █     █    █     █    │ 
+##                    │     █     █    █     █    █     █    █     █    █     █    │ 
+##                    │     █     █    █     █    █     █    █     █    █     █    │ 
+##                0.0 │█    █     █    █     █    █     █    █     █    █     █   █│ 
 ##                    └────────────────────────────────────────────────────────────┘ 
 ##                                                                                   
-##                     -1.5           1.8           5.0            8.2         11.5  
+##                     -0.5           2.2           5.0            7.8         10.5  
 ##                                                                                   
 ##                                                  x                                
 ## </code></pre>

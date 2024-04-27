@@ -79,30 +79,36 @@ rbind_plots = function(...) {
   return(plot1$merge(plot2))
 }
 
-#' Combine two plotcli objects horizontally
+#' Generic function for combining plotcli objects horizontally
 #'
-#' This function combines two plotcli objects horizontally, centering them vertically.
-#'
-#' @param plot1 A plotcli object to be combined.
-#' @param plot2 A plotcli object to be combined.
+#' @param ... plotcli objects to be combined.
+#' @param deparse.level The deparsing level for the arguments.
 #' @return A combined plot matrix.
 #' @export
-cbind.plotcli = function(plot1, plot2) {
-  # Call the cbind_plots function with the plotcli objects
+cbind.plotcli <- function(..., deparse.level = 1) {
+  plots <- list(...)
+  if (length(plots) != 2) {
+    stop("cbind.plotcli only supports combining exactly two plotcli objects.")
+  }
+  plot1 <- plots[[1]]
+  plot2 <- plots[[2]]
   combined_matrix <- cbind_plots(plot1, plot2)
   return(combined_matrix)
 }
 
-#' Combine two plotcli objects vertically
+#' Generic function for combining plotcli objects vertically
 #'
-#' This function combines two plotcli objects vertically, centering them horizontally.
-#'
-#' @param plot1 A plotcli object to be combined.
-#' @param plot2 A plotcli object to be combined.
+#' @param ... plotcli objects to be combined.
+#' @param deparse.level The deparsing level for the arguments.
 #' @return A combined plot matrix.
 #' @export
-rbind.plotcli = function(plot1, plot2) {
-  # Call the rbind_plots function with the plotcli objects
+rbind.plotcli <- function(..., deparse.level = 1) {
+  plots <- list(...)
+  if (length(plots) != 2) {
+    stop("rbind.plotcli only supports combining exactly two plotcli objects.")
+  }
+  plot1 <- plots[[1]]
+  plot2 <- plots[[2]]
   combined_matrix <- rbind_plots(plot1, plot2)
   return(combined_matrix)
 }

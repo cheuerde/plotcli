@@ -75,8 +75,8 @@ plotcli_density <- function(
                             ...
                             ) {
 
-  y <- density(x)$y
-  x <- density(x)$x
+  y <- stats::density(x)$y
+  x <- stats::density(x)$x
 
   plot <- plotcli$new(
                       plot_width = plot_width,
@@ -174,7 +174,7 @@ plotcli_histogram <- function(
                               ...
                               ) {
 
-  hist_data <- hist(
+  hist_data <- graphics::hist(
                     x, 
                     plot = FALSE, 
                     breaks = if (!is.null(bin_width)) seq(min(x), max(x) + bin_width, by = bin_width) else "Sturges"
@@ -297,32 +297,120 @@ plotcli_box <- function(
 }
 
 # short versions
+
 #' @title Short version of plotcli_scatter
 #' @description Short version of plotcli_scatter function.
+#' @param x A numeric vector of x values
+#' @param y A numeric vector of y values
+#' @param plot_width Width of the plot (default: 80)
+#' @param plot_height Height of the plot (default: 40)
+#' @param x_label Label for the x-axis (default: "x")
+#' @param y_label Label for the y-axis (default: "y")
+#' @param color Color of the plot elements (default: NULL)
+#' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "scatter")
+#' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
+#' 
+#' @examples
+#' x <- rnorm(100)
+#' y <- rnorm(100)
+#' pclis(x, y)
 pclis <- plotcli_scatter
 
 #' @title Short version of plotcli_density
 #' @description Short version of plotcli_density function.
+#' @param x A numeric vector of values
+#' @param plot_width Width of the plot (default: 80)
+#' @param plot_height Height of the plot (default: 40)
+#' @param x_label Label for the x-axis (default: "x")
+#' @param y_label Label for the y-axis (default: "Density")
+#' @param color Color of the plot elements (default: NULL)
+#' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "density")
+#' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
+#'
+#' @examples
+#' x <- rnorm(100)
+#' pclid(x)
 pclid <- plotcli_density
 
 #' @title Short version of plotcli_line
 #' @description Short version of plotcli_line function.
+#' @param x A numeric vector of x values
+#' @param y A numeric vector of y values
+#' @param plot_width Width of the plot (default: 80)
+#' @param plot_height Height of the plot (default: 40)
+#' @param x_label Label for the x-axis (default: "x")
+#' @param y_label Label for the y-axis (default: "y")
+#' @param color Color of the plot elements (default: NULL)
+#' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "line")
+#' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
+#'
+#' @examples
+#' x <- 1:10
+#' y <- x^2
+#' pclil(x, y)
 pclil <- plotcli_line
 
 #' @title Short version of plotcli_histogram
 #' @description Short version of plotcli_histogram function.
+#' @param x A numeric vector of values
+#' @param plot_width Width of the plot (default: 80)
+#' @param plot_height Height of the plot (default: 40)
+#' @param x_label Label for the x-axis (default: "x")
+#' @param y_label Label for the y-axis (default: "Frequency")
+#' @param color Color of the plot elements (default: NULL)
+#' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param bin_width Width of the bins (default: NULL)
+#' @param ylim y limits (default: NULL)
+#' @param name Name of the plot element (default: "histogram")
+#' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
+#'
+#' @examples
+#' x <- rnorm(100)
+#' pclih(x)
 pclih <- plotcli_histogram
 
 #' @title Short version of plotcli_bar
 #' @description Short version of plotcli_bar function.
+#' @param x A vector of categories
+#' @param y A numeric vector of values
+#' @param plot_width Width of the plot (default: 80)
+#' @param plot_height Height of the plot (default: 40)
+#' @param x_label Label for the x-axis (default: "x")
+#' @param y_label Label for the y-axis (default: "y")
+#' @param color Color of the plot elements (default: NULL)
+#' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "barplot")
+#' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
+#'
+#' @examples
+#' x <- 1:5
+#' y <- c(10, 15, 8, 12, 6)
+#' pclib(x, y)
 pclib <- plotcli_bar
 
 #' @title Short version of plotcli_box
 #' @description Short version of plotcli_box function.
+#' @param x A vector of categories
+#' @param y A list of numeric vectors of values
+#' @param plot_width Width of the plot (default: 80)
+#' @param plot_height Height of the plot (default: 40)
+#' @param x_label Label for the x-axis (default: "x")
+#' @param y_label Label for the y-axis (default: "y")
+#' @param color Color of the plot elements (default: NULL)
+#' @param braille Use Braille characters for the plot (default: TRUE)
+#' @param name Name of the plot element (default: "boxplot")
+#' @param ... Additional arguments passed to the plotcli$new() function
 #' @export
+#'
+#' @examples
+#' y <- rnorm(50, mean = 0)
+#' pclib(y)
 pclibx <- plotcli_box

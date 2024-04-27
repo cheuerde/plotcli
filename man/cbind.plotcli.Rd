@@ -2,18 +2,18 @@
 % Please edit documentation in R/class_functions.r
 \name{cbind.plotcli}
 \alias{cbind.plotcli}
-\title{Combine two plotcli objects horizontally}
+\title{Generic function for combining plotcli objects horizontally}
 \usage{
-\method{cbind}{plotcli}(plot1, plot2)
+\method{cbind}{plotcli}(..., deparse.level = 1)
 }
 \arguments{
-\item{plot1}{A plotcli object to be combined.}
+\item{...}{plotcli objects to be combined.}
 
-\item{plot2}{A plotcli object to be combined.}
+\item{deparse.level}{The deparsing level for the arguments.}
 }
 \value{
 A combined plot matrix.
 }
 \description{
-This function combines two plotcli objects horizontally, centering them vertically.
+Generic function for combining plotcli objects horizontally
 }

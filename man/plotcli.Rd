@@ -51,7 +51,6 @@ plotcli$print_plot()
 }
 
 \examples{
-\dontrun{
 # Create a new plotcli object
 plotcli <- plotcli$new()
 
@@ -60,7 +59,6 @@ plotcli$add_data(list(x = 1:10, y = rnorm(10), type = "scatter", color = "red"))
 
 # Print the plot
 plotcli$print_plot()
-}
 
 }
 \section{Public fields}{
