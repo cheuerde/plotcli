@@ -1,5 +1,11 @@
 # plotcli: Command-Line Plots for R
 
+[![CRAN status](https://www.r-pkg.org/badges/version/plotcli?color=green)](https://CRAN.R-project.org/package=plotcli)
+[![CRAN checks](https://badges.cranchecks.info/worst/plotcli.svg)](https://cran.r-project.org/web/checks/check_results_plotcli.html)
+[![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotcli)](http://www.r-pkg.org/pkg/plotcli)
+[![Downloads](http://cranlogs.r-pkg.org/badges/plotcli?color=blue)](http://www.r-pkg.org/pkg/plotcli)
+
+
 ![Colored Density Plot on Terminal](docs/boxplot.jpg)
 
 plotcli is an R package that brings the power of command-line plotting to your R environment. 
