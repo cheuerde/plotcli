@@ -517,71 +517,46 @@ plotcli <- R6Class("plotcli",
       braille <- self$data[[set_idx]]$braille
 
       if (braille) {
-        # Calculate Braille resolution
-        braille_width <- (ncol(plot_canvas)) * 2
-        braille_height <- (nrow(plot_canvas)) * 4
+        # Calculate Braille resolution (2x horizontal, 4x vertical)
+        braille_width <- ncol(plot_canvas) * 2
+        braille_height <- nrow(plot_canvas) * 4
 
         # Normalize x and y data points to fit within the Braille plot area
         x_norm <- round(normalize_data(x, x_min, x_max, braille_width))
-        y_norm <- round(normalize_data(y, y_min, y_max, braille_height))
+        # Invert y so that higher values are at the top (lower pixel y)
+        y_norm <- braille_height - round(normalize_data(y, y_min, y_max, braille_height)) + 1
 
         # Draw data points using Braille characters
         for (i in 1:length(x)) {
-          # Calculate Braille character row and column
-          braille_row <- nrow(plot_canvas) - ceiling(y_norm[i] / 4) + 1
-          braille_col <- x_norm[i] %/% 2 + 1
-
-          if (braille_row < 1) braille_row <- 1
-          if (braille_row > nrow(plot_canvas)) braille_row <- nrow(plot_canvas)
-
-          if (braille_col < 1) braille_col <- 1
-          if (braille_col > ncol(plot_canvas)) braille_col <- ncol(plot_canvas)
-
-          # Calculate Braille dot position within the 2x4 grid
-          dot_row <- 4 - (y_norm[i] - 1) %% 4
-          dot_col <- 2 - (x_norm[i] - 1) %% 2
-
-          # Calculate Braille dot index (1 to 8)
-          dot_index <- (dot_col - 1) * 4 + (dot_row - 1) %/% 2 + 1
-
-          # Calculate Braille character Unicode offset
-          braille_offset <- 2^(dot_index)
-
-          # Update the Braille character in the plot matrix
-          current_char <- plot_canvas[braille_row, braille_col]
-
-          if (!is_braille(current_char) | current_char == " ") {
-            current_code <- 0x2800
-          } else {
-            current_code <- utf8ToInt(current_char)
-          }
-
-          # Check if the Braille dot is already set
-          braille_dot_already_set <- (current_code & (2^(dot_index - 1))) != 0
-
-          # new_code <- current_code + braille_offset
-          # Check if the new code is within the Braille character range
-          if (current_code + braille_offset <= 0x28FF) {
-            new_code <- current_code + braille_offset
-          } else {
-            new_code <- current_code
-          }
-
-          plot_canvas[braille_row, braille_col] <- intToUtf8(new_code)
+          # Convert pixel coordinates to Braille cell and dot position
+          pos <- pixel_to_braille(x_norm[i], y_norm[i], nrow(plot_canvas), ncol(plot_canvas))
+          
+          # Get current character and set the dot
+          current_char <- plot_canvas[pos$cell_row, pos$cell_col]
+          plot_canvas[pos$cell_row, pos$cell_col] <- braille_set_dot(
+            current_char, pos$dot_row, pos$dot_col
+          )
 
           # color tracking
-          self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = braille_row, col = braille_col)
+          self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- 
+            list(row = pos$cell_row, col = pos$cell_col)
         }
       } else {
         # Normalize x and y data points to fit within the plot area
-        x_norm <- round(normalize_data(x, x_min, x_max, ncol(plot_canvas) - 0))
-        y_norm <- round(normalize_data(y, y_min, y_max, nrow(plot_canvas) - 0))
+        x_norm <- round(normalize_data(x, x_min, x_max, ncol(plot_canvas)))
+        y_norm <- round(normalize_data(y, y_min, y_max, nrow(plot_canvas)))
 
         # Draw data points using asterisk
         for (i in 1:length(x)) {
-          ascii_row <- (nrow(plot_canvas)) - y_norm[i] + 1
-          ascii_col <- x_norm[i] + 0
-          self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = ascii_row, col = ascii_col)
+          ascii_row <- nrow(plot_canvas) - y_norm[i] + 1
+          ascii_col <- x_norm[i]
+          
+          # Clamp to valid range
+          ascii_row <- max(1, min(ascii_row, nrow(plot_canvas)))
+          ascii_col <- max(1, min(ascii_col, ncol(plot_canvas)))
+          
+          self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- 
+            list(row = ascii_row, col = ascii_col)
           plot_canvas[ascii_row, ascii_col] <- "*"
         }
       }
@@ -606,69 +581,62 @@ plotcli <- R6Class("plotcli",
       braille <- self$data[[set_idx]]$braille
 
       if (braille) {
-        braille_width <- (ncol(plot_canvas)) * 2
-        braille_height <- (nrow(plot_canvas)) * 4
+        # Calculate Braille resolution (2x horizontal, 4x vertical)
+        braille_width <- ncol(plot_canvas) * 2
+        braille_height <- nrow(plot_canvas) * 4
 
+        # Normalize to pixel coordinates
         x_norm <- round(normalize_data(x, x_min, x_max, braille_width))
-        y_norm <- round(normalize_data(y, y_min, y_max, braille_height))
-      } else {
-        x_norm <- round(normalize_data(x, x_min, x_max, ncol(plot_canvas) - 0))
-        y_norm <- round(normalize_data(y, y_min, y_max, nrow(plot_canvas) - 0))
-      }
+        # Invert y so that higher values are at the top (lower pixel y)
+        y_norm <- braille_height - round(normalize_data(y, y_min, y_max, braille_height)) + 1
 
-      for (i in 1:(length(x) - 1)) {
-        if (braille) {
-          points <- bresenham(
-            x_norm[i] %/% 2, nrow(plot_canvas) - ceiling(y_norm[i] / 4) - 0,
-            x_norm[i + 1] %/% 2, nrow(plot_canvas) - ceiling(y_norm[i + 1] / 4) - 0
-          )
-          points <- lapply(points, function(x) {
-            x + c(0, 1)
-          })
-        } else {
-          points <- bresenham(
-            x_norm[i], (nrow(plot_canvas)) - y_norm[i],
-            x_norm[i + 1], (nrow(plot_canvas)) - y_norm[i + 1]
-          )
-          points <- lapply(points, function(x) {
-            x + c(0, 1)
-          })
+        # Draw lines between consecutive points at pixel resolution
+        for (i in 1:(length(x) - 1)) {
+          # Get all pixel points along the line using Bresenham
+          pixel_points <- bresenham(x_norm[i], y_norm[i], x_norm[i + 1], y_norm[i + 1])
+
+          for (pixel in pixel_points) {
+            px <- pixel[1]
+            py <- pixel[2]
+            
+            # Convert pixel to Braille cell and dot
+            pos <- pixel_to_braille(px, py, nrow(plot_canvas), ncol(plot_canvas))
+            
+            # Set the dot
+            current_char <- plot_canvas[pos$cell_row, pos$cell_col]
+            plot_canvas[pos$cell_row, pos$cell_col] <- braille_set_dot(
+              current_char, pos$dot_row, pos$dot_col
+            )
+
+            # color tracking
+            self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- 
+              list(row = pos$cell_row, col = pos$cell_col)
+          }
         }
+      } else {
+        # ASCII mode - draw at character resolution
+        x_norm <- round(normalize_data(x, x_min, x_max, ncol(plot_canvas)))
+        y_norm <- round(normalize_data(y, y_min, y_max, nrow(plot_canvas)))
 
-        for (point in points) {
-          if (braille) {
-            if (point[2] < 1) point[2] <- 1
-            if (point[2] > nrow(plot_canvas)) point[2] <- nrow(plot_canvas)
+        for (i in 1:(length(x) - 1)) {
+          # Invert y for screen coordinates
+          y1 <- nrow(plot_canvas) - y_norm[i] + 1
+          y2 <- nrow(plot_canvas) - y_norm[i + 1] + 1
+          
+          points <- bresenham(x_norm[i], y1, x_norm[i + 1], y2)
 
-            if (point[1] < 1) point[1] <- 1
-            if (point[2] > ncol(plot_canvas)) point[2] <- ncol(plot_canvas)
-
-            dot_row <- 4 - (y_norm[i] - 1) %% 4
-            dot_col <- 2 - (x_norm[i] - 1) %% 2
-            dot_index <- (dot_col - 1) * 4 + (dot_row - 1) %/% 2 + 1
-            braille_offset <- 2^(dot_index - 1)
-            current_char <- plot_canvas[point[2], point[1]]
-
-            if (!is_braille(current_char) | current_char == " ") {
-              current_code <- 0x2800
-            } else {
-              current_code <- utf8ToInt(current_char)
-            }
-
-            if (current_code + braille_offset <= 0x28FF) {
-              new_code <- current_code + braille_offset
-            } else {
-              new_code <- current_code
-            }
-
-            plot_canvas[point[2], point[1]] <- intToUtf8(new_code)
-
+          for (point in points) {
+            row <- point[2]
+            col <- point[1]
+            
+            # Clamp to valid range
+            row <- max(1, min(row, nrow(plot_canvas)))
+            col <- max(1, min(col, ncol(plot_canvas)))
+            
             # color tracking
-            self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = point[2], col = point[1])
-          } else {
-            # color tracking
-            self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = point[2], col = point[1])
-            plot_canvas[point[2], point[1]] <- "*"
+            self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- 
+              list(row = row, col = col)
+            plot_canvas[row, col] <- "*"
           }
         }
       }
@@ -719,38 +687,30 @@ draw_barplot_braille = function(set_idx) {
   x <- self$data[[set_idx]]$x
   y <- self$data[[set_idx]]$y
 
+  braille_height <- nrow(plot_canvas) * 4
+
   # Normalize x and y data points to fit within the plot area
   x_norm <- round(normalize_data(x, x_min, x_max, ncol(plot_canvas)))
-  y_norm <- round(normalize_data(y, y_min, y_max, nrow(plot_canvas) * 4)) # Multiply by 4 for Braille resolution
+  y_norm <- round(normalize_data(y, y_min, y_max, braille_height))
 
   for (i in 1:length(x)) {
-    for (j in 1:y_norm[i]) {
-      braille_row <- nrow(plot_canvas) - ceiling(j / 4) + 1
-      braille_col <- x_norm[i]
-
-      if (braille_row < 1) braille_row <- 1
-      if (braille_row > nrow(plot_canvas)) braille_row <- nrow(plot_canvas)
-
-      dot_row <- 4 - (j - 1) %% 4
-      dot_col <- 2 - (j - 1) %% 2
-      dot_index <- (dot_col - 1) * 4 + (dot_row - 1) %/% 2 + 1
-      braille_offset <- 2^(dot_index - 1)
-      current_char <- plot_canvas[braille_row, braille_col]
-
-      if (!is_braille(current_char) | current_char == " ") {
-        current_code <- 0x2800
-      } else {
-        current_code <- utf8ToInt(current_char)
-      }
-
-      if (current_code + braille_offset <= 0x28FF) {
-        new_code <- current_code + braille_offset
-      } else {
-        new_code <- current_code
-      }
-
-      plot_canvas[braille_row, braille_col] <- intToUtf8(new_code)
-      self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- list(row = braille_row, col = braille_col)
+    # For each bar, fill from bottom up
+    # py goes from braille_height (bottom) up to (braille_height - y_norm[i] + 1)
+    bar_top_py <- braille_height - y_norm[i] + 1
+    
+    for (py in braille_height:bar_top_py) {
+      # For bars, we fill both columns of the Braille cell for a solid look
+      # Use the x_norm position, and fill both dot columns
+      pos <- pixel_to_braille(x_norm[i] * 2 - 1, py, nrow(plot_canvas), ncol(plot_canvas))
+      
+      # Set both left and right dots in this row for a fuller bar
+      current_char <- plot_canvas[pos$cell_row, pos$cell_col]
+      current_char <- braille_set_dot(current_char, pos$dot_row, 0)  # left column
+      current_char <- braille_set_dot(current_char, pos$dot_row, 1)  # right column
+      plot_canvas[pos$cell_row, pos$cell_col] <- current_char
+      
+      self$data[[set_idx]]$matrix_colored[[length(self$data[[set_idx]]$matrix_colored) + 1]] <- 
+        list(row = pos$cell_row, col = pos$cell_col)
     }
   }
 

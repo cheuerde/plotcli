@@ -208,6 +208,102 @@ is_braille <- function(char) {
     return((code >= 0x2800 && code <= 0x28FF))
 }
 
+#' Get Braille dot bit value
+#'
+#' Returns the bit value for a specific dot position in a Braille cell.
+#' Braille cells have a 2x4 dot matrix:
+#' 
+#'   Col 0  Col 1
+#'   ┌────┬────┐
+#' Row 0 │ 0x01│ 0x08│
+#'   ├────┼────┤
+#' Row 1 │ 0x02│ 0x10│
+#'   ├────┼────┤
+#' Row 2 │ 0x04│ 0x20│
+#'   ├────┼────┤
+#' Row 3 │ 0x40│ 0x80│
+#'   └────┴────┘
+#'
+#' @param dot_row Row within the Braille cell (0-3, top to bottom)
+#' @param dot_col Column within the Braille cell (0-1, left to right)
+#' @return The bit value for that dot position
+#' @export
+braille_dot_bit <- function(dot_row, dot_col) {
+    # Braille dot bit mapping
+    # Left column (col 0): rows 0-2 are bits 0-2, row 3 is bit 6
+    # Right column (col 1): rows 0-2 are bits 3-5, row 3 is bit 7
+    if (dot_col == 0) {
+        if (dot_row < 3) {
+            return(bitwShiftL(1L, dot_row))
+        } else {
+            return(0x40L)  # bit 6
+        }
+    } else {
+        if (dot_row < 3) {
+            return(bitwShiftL(1L, dot_row + 3))
+        } else {
+            return(0x80L)  # bit 7
+        }
+    }
+}
+
+#' Set a dot in a Braille character
+#'
+#' @param current_char The current character (can be space or existing Braille)
+#' @param dot_row Row within the Braille cell (0-3)
+#' @param dot_col Column within the Braille cell (0-1)
+#' @return The updated Braille character
+#' @export
+braille_set_dot <- function(current_char, dot_row, dot_col) {
+    # Get current code point
+    if (is.null(current_char) || current_char == " " || !is_braille(current_char)) {
+        current_code <- 0x2800L
+    } else {
+        current_code <- utf8ToInt(current_char)
+    }
+    
+    # Get the bit for this dot position
+    dot_bit <- braille_dot_bit(dot_row, dot_col)
+    
+    # Set the bit using OR
+    new_code <- bitwOr(current_code, dot_bit)
+    
+    return(intToUtf8(new_code))
+}
+
+#' Convert pixel coordinates to Braille cell and dot position
+#'
+#' @param px Pixel x coordinate (1-based)
+#' @param py Pixel y coordinate (1-based, from top)
+#' @param canvas_rows Number of character rows in canvas
+#' @param canvas_cols Number of character columns in canvas
+#' @return List with cell_row, cell_col, dot_row, dot_col
+#' @export
+pixel_to_braille <- function(px, py, canvas_rows, canvas_cols) {
+    # Braille gives us 2x horizontal and 4x vertical resolution
+    # px ranges from 1 to canvas_cols * 2
+    # py ranges from 1 to canvas_rows * 4
+    
+    # Cell position (1-based)
+    cell_col <- ((px - 1) %/% 2) + 1
+    cell_row <- ((py - 1) %/% 4) + 1
+    
+    # Dot position within cell (0-based)
+    dot_col <- (px - 1) %% 2
+    dot_row <- (py - 1) %% 4
+    
+    # Clamp to valid range
+    cell_col <- max(1, min(cell_col, canvas_cols))
+    cell_row <- max(1, min(cell_row, canvas_rows))
+    
+    return(list(
+        cell_row = cell_row,
+        cell_col = cell_col,
+        dot_row = dot_row,
+        dot_col = dot_col
+    ))
+}
+
 #' Make unique names
 #'
 #' This function takes a vector of names and ensures that each name is unique by appending a number if necessary.

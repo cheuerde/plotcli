@@ -44,6 +44,49 @@ get_data_subset <- function(geom_name, data, aes, p_build) {
 
 }
 
+#' Safely extract aesthetic name from ggplot mapping
+#'
+#' Handles quosures, simple symbols, and calls like factor(cyl)
+#'
+#' @param aes_expr The aesthetic expression (can be a quosure)
+#' @return Character string of the column name, or NULL
+safe_aes_name <- function(aes_expr) {
+  if (is.null(aes_expr)) return(NULL)
+  
+  # If it's a quosure, extract the expression
+  if (rlang::is_quosure(aes_expr)) {
+    aes_expr <- rlang::quo_get_expr(aes_expr)
+  }
+  
+  # If it's a simple symbol, use as_name
+  if (rlang::is_symbol(aes_expr)) {
+    return(rlang::as_name(aes_expr))
+  }
+  
+  # If it's a call (like factor(cyl)), try to extract the first argument
+  if (rlang::is_call(aes_expr)) {
+    # Get the call arguments
+    args <- rlang::call_args(aes_expr)
+    if (length(args) > 0) {
+      # Recursively try to get the name from the first argument
+      return(safe_aes_name(args[[1]]))
+    }
+  }
+  
+  # Fallback: try to deparse and clean up
+  tryCatch({
+    # Last resort: deparse the expression
+    deparsed <- deparse(aes_expr)
+    # Try to extract column name from factor(col) or similar
+    if (grepl("^\\w+\\((.+)\\)$", deparsed)) {
+      return(gsub("^\\w+\\((.+)\\)$", "\\1", deparsed))
+    }
+    return(deparsed)
+  }, error = function(e) {
+    return(NULL)
+  })
+}
+
 #' ggplotcli - Render ggplot objects in the terminal
 #'
 #' This function takes a ggplot object and renders it in the terminal using ASCII or Braille characters.
@@ -83,12 +126,13 @@ ggplotcli <- function(ggplot_obj, plot_width = 80, plot_height = 40, braille = T
     geom_name <- geom_names[i]
     plot_type <- geoms_valid[geoms_valid$geom == geom_name, "plot_type"]
 
-    color_aes <- if (!is.null(aes$colour)) rlang::as_name(aes$colour) else NULL
+    # Safely extract color aesthetic name (handles factor(col) etc.)
+    color_aes <- safe_aes_name(aes$colour)
 
     # FIXME: need to get barplot to work
     if (!geom_name %in% geoms_valid$geom | geom_name == "GeomBar") stop("Unsupported geom: ", geom_name)
 
-    if (!is.null(color_aes)) {
+    if (!is.null(color_aes) && color_aes %in% names(data)) {
 
       aes_levels <- as.character(unique(data[[color_aes]]))
       num_levels <- length(aes_levels)
