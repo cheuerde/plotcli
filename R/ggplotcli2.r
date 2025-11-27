@@ -633,6 +633,11 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
     panel_params <- built$layout$panel_params[[panel_idx]]
     scales <- create_panel_scales(panel_params, canvas$pixel_width, canvas$pixel_height)
     
+    # Draw grid lines first (behind data)
+    if (style_opts$grid != "none") {
+      draw_grid(canvas, scales, style_opts$grid)
+    }
+    
     # Render layers for this panel
     for (layer_idx in seq_along(built$data)) {
       layer_data <- built$data[[layer_idx]]
@@ -660,6 +665,11 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
         warning(sprintf("Error rendering %s in panel %d: %s", 
                         geom_class, panel_idx, e$message))
       })
+    }
+    
+    # Draw border if requested
+    if (style_opts$border) {
+      draw_border(canvas)
     }
     
     # Get rendered canvas
