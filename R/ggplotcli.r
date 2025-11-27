@@ -145,6 +145,19 @@ ggplotcli <- function(p,
   # Build the plot to get computed data
   built <- ggplot2::ggplot_build(p)
   
+  # Initialize color mapping for all colors in the plot
+  # This ensures we minimize color repetition across groups
+  all_colors <- c()
+  for (layer_data in built$data) {
+    if ("colour" %in% names(layer_data)) {
+      all_colors <- c(all_colors, layer_data$colour)
+    }
+    if ("fill" %in% names(layer_data)) {
+      all_colors <- c(all_colors, layer_data$fill)
+    }
+  }
+  init_color_mapping(unique(all_colors))
+  
   # Extract styling from ggplot theme
   style <- extract_plot_style(built, border, grid, legend)
   

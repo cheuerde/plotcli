@@ -668,10 +668,107 @@ geom_text_handler <- function(data, canvas, scales, params, style_opts = NULL) {
 # Color Conversion
 # ============================================================================
 
+# ============================================================================
+# Color Mapping System
+# ============================================================================
+
+# Environment to store color mappings for the current plot
+.color_map_env <- new.env(parent = emptyenv())
+
+#' Initialize color mapping for a set of ggplot colors
+#'
+#' This function takes all unique colors from a ggplot and assigns terminal
+#' colors to minimize repetition while respecting hue similarity.
+#'
+#' @param ggplot_colors Vector of unique colors from ggplot
+#' @export
+init_color_mapping <- function(ggplot_colors) {
+  # Available chromatic terminal colors (in hue order: 0, 60, 120, 180, 240, 300)
+  term_colors <- c("red", "yellow", "green", "cyan", "blue", "magenta")
+  n_term <- length(term_colors)
+  
+  # Filter out NULL/NA and get unique colors
+  ggplot_colors <- unique(ggplot_colors[!is.na(ggplot_colors) & !is.null(ggplot_colors)])
+  n_colors <- length(ggplot_colors)
+  
+  if (n_colors == 0) {
+    .color_map_env$mapping <- list()
+    return(invisible(NULL))
+  }
+  
+  # Calculate hue for each ggplot color
+  hues <- sapply(ggplot_colors, get_color_hue)
+  
+  # Sort colors by hue
+  hue_order <- order(hues)
+  sorted_colors <- ggplot_colors[hue_order]
+  sorted_hues <- hues[hue_order]
+  
+  # Assign terminal colors to minimize repetition
+  # Strategy: distribute terminal colors evenly across the sorted hue spectrum
+  mapping <- list()
+  
+  if (n_colors <= n_term) {
+    # We have enough terminal colors - assign each ggplot color a unique one
+    # Use the hue-sorted order to assign colors that are spread out
+    term_indices <- round(seq(1, n_term, length.out = n_colors))
+    for (i in seq_along(sorted_colors)) {
+      mapping[[sorted_colors[i]]] <- term_colors[term_indices[i]]
+    }
+  } else {
+    # More ggplot colors than terminal colors - minimize repetition
+    # Each terminal color will be used ceiling(n_colors/n_term) or floor times
+    # Distribute evenly across the hue-sorted colors
+    for (i in seq_along(sorted_colors)) {
+      # Cycle through terminal colors
+      term_idx <- ((i - 1) %% n_term) + 1
+      mapping[[sorted_colors[i]]] <- term_colors[term_idx]
+    }
+  }
+  
+  .color_map_env$mapping <- mapping
+  invisible(NULL)
+}
+
+#' Get the hue of a color (0-360 degrees)
+#'
+#' @param color A color value
+#' @return Hue in degrees (0-360) or NA for grayscale
+#' @keywords internal
+get_color_hue <- function(color) {
+  if (is.null(color) || is.na(color)) return(NA)
+  
+  tryCatch({
+    rgb_val <- col2rgb(color)
+    r <- rgb_val[1, 1]
+    g <- rgb_val[2, 1]
+    b <- rgb_val[3, 1]
+    
+    max_val <- max(r, g, b)
+    min_val <- min(r, g, b)
+    chroma <- max_val - min_val
+    
+    if (chroma == 0) return(NA)  # Grayscale
+    
+    if (max_val == r) {
+      hue <- 60 * (((g - b) / chroma) %% 6)
+    } else if (max_val == g) {
+      hue <- 60 * ((b - r) / chroma + 2)
+    } else {
+      hue <- 60 * ((r - g) / chroma + 4)
+    }
+    
+    if (hue < 0) hue <- hue + 360
+    return(hue)
+  }, error = function(e) {
+    return(NA)
+  })
+}
+
 #' Convert ggplot2 color to terminal color name
 #'
-#' Maps any color to the closest terminal color using hue-based matching.
-#' Terminal colors available: red, green, blue, yellow, magenta, cyan, white, black, silver
+#' If init_color_mapping() was called, uses the pre-computed mapping.
+#' Otherwise falls back to simple hue-based matching.
 #'
 #' @param color A color value (hex, name, or R color)
 #' @return A terminal color name (blue, red, green, etc.) or NULL
@@ -685,7 +782,14 @@ color_to_term <- function(color) {
     return(tolower(color))
   }
   
-  # Try to convert hex/named color to RGB and find closest terminal color
+  # Check if we have a pre-computed mapping
+  if (exists("mapping", envir = .color_map_env) && 
+      length(.color_map_env$mapping) > 0 &&
+      color %in% names(.color_map_env$mapping)) {
+    return(.color_map_env$mapping[[color]])
+  }
+  
+  # Fallback: simple hue-based matching
   tryCatch({
     rgb_val <- col2rgb(color)
     r <- rgb_val[1, 1]
@@ -706,47 +810,20 @@ color_to_term <- function(color) {
       return("black")
     }
     
-    # For chromatic colors, use hue-based matching
-    # Convert to HSV-like hue calculation
-    chroma <- max_val - min_val
+    # Get hue and map to terminal color
+    hue <- get_color_hue(color)
+    if (is.na(hue)) return("silver")
     
-    if (chroma == 0) {
-      return("silver")
-    }
-    
-    # Calculate hue (0-360 degrees)
-    if (max_val == r) {
-      hue <- 60 * (((g - b) / chroma) %% 6)
-    } else if (max_val == g) {
-      hue <- 60 * ((b - r) / chroma + 2)
-    } else {
-      hue <- 60 * ((r - g) / chroma + 4)
-    }
-    
-    if (hue < 0) hue <- hue + 360
-    
-    # Map hue to terminal colors
-    # Optimized boundaries based on ggplot2's default palette distribution:
-    # - ggplot2 8-group hues: 4, 44, 77, 152, 182, 200, 274, 319
-    # - ggplot2 16-group hues: 4, 33, 44, 57, 77, 117, 152, 168, 182, 192, 200, 232, 274, 300, 319, 337
-    #
-    # Terminal color assignments:
-    # Red: 0-20, 325-360 (salmon, pink-red)
-    # Yellow: 20-65 (orange, gold, olive)
-    # Green: 65-140 (lime, green)
-    # Cyan: 140-190 (teal, cyan)
-    # Blue: 190-260 (azure, blue, violet-blue)
-    # Magenta: 260-325 (purple, magenta, pink)
-    
-    if (hue < 20 || hue >= 325) {
+    # Map hue to terminal colors (60-degree segments)
+    if (hue < 30 || hue >= 330) {
       return("red")
-    } else if (hue < 65) {
+    } else if (hue < 90) {
       return("yellow")
-    } else if (hue < 140) {
+    } else if (hue < 150) {
       return("green")
-    } else if (hue < 190) {
+    } else if (hue < 210) {
       return("cyan")
-    } else if (hue < 260) {
+    } else if (hue < 270) {
       return("blue")
     } else {
       return("magenta")
