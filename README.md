@@ -118,7 +118,11 @@ ggplotcli(p, canvas_type = "ascii")    # Basic ASCII
 # From CRAN
 install.packages("plotcli")
 
-# Or from GitHub for the latest version
+# Or from GitHub for the latest development version
+# Using remotes (recommended)
+remotes::install_github("cheuerde/plotcli")
+
+# Or using devtools
 devtools::install_github("cheuerde/plotcli")
 ```
 
