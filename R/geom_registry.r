@@ -124,13 +124,39 @@ create_scales <- function(built, plot_width, plot_height, has_border = FALSE) {
     y_max - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (y_max - y_min)
   }
   
+  # Check for discrete x-axis labels
+  x_labels <- NULL
+  x_label_positions <- NULL
+  if (!is.null(panel_params$x) && !is.null(panel_params$x$breaks)) {
+    x_labels <- panel_params$x$get_labels()
+    x_label_positions <- attr(panel_params$x$breaks, "pos")
+    if (is.null(x_label_positions)) {
+      x_label_positions <- seq_along(x_labels)
+    }
+  }
+  
+  # Check for discrete y-axis labels
+  y_labels <- NULL
+  y_label_positions <- NULL
+  if (!is.null(panel_params$y) && !is.null(panel_params$y$breaks)) {
+    y_labels <- panel_params$y$get_labels()
+    y_label_positions <- attr(panel_params$y$breaks, "pos")
+    if (is.null(y_label_positions)) {
+      y_label_positions <- seq_along(y_labels)
+    }
+  }
+  
   list(
     x = x_scale,
     y = y_scale,
     x_range = x_range,
     y_range = y_range,
     width = plot_width,
-    height = plot_height
+    height = plot_height,
+    x_labels = x_labels,
+    x_label_positions = x_label_positions,
+    y_labels = y_labels,
+    y_label_positions = y_label_positions
   )
 }
 

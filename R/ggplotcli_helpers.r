@@ -380,21 +380,45 @@ build_plot_output_v2 <- function(canvas, scales, width, height, style_opts,
     
     # Draw X axis values
     x_row <- top_margin + nrow(rendered) + 1
-    x_ticks <- pretty(scales$x_range, n = 5)
-    x_ticks <- x_ticks[x_ticks >= scales$x_range[1] & x_ticks <= scales$x_range[2]]
     
-    for (tick in x_ticks) {
-      x_frac <- (tick - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
-      col <- round(x_frac * (ncol(rendered) - 1)) + left_margin + 1
-      
-      if (col >= left_margin && col <= width && x_row <= height) {
-        label <- format_axis_label(tick)
-        label_chars <- strsplit(label, "")[[1]]
+    # Check if we have discrete labels
+    if (!is.null(scales$x_labels) && length(scales$x_labels) > 0) {
+      # Use discrete labels
+      for (i in seq_along(scales$x_labels)) {
+        pos <- scales$x_label_positions[i]
+        x_frac <- (pos - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
+        col <- round(x_frac * (ncol(rendered) - 1)) + left_margin + 1
         
-        start_col <- col - floor(length(label_chars) / 2)
-        for (i in seq_along(label_chars)) {
-          if (start_col + i - 1 >= 1 && start_col + i - 1 <= width) {
-            output[x_row, start_col + i - 1] <- label_chars[i]
+        if (col >= left_margin && col <= width && x_row <= height) {
+          label <- scales$x_labels[i]
+          label_chars <- strsplit(label, "")[[1]]
+          
+          start_col <- col - floor(length(label_chars) / 2)
+          for (j in seq_along(label_chars)) {
+            if (start_col + j - 1 >= 1 && start_col + j - 1 <= width) {
+              output[x_row, start_col + j - 1] <- label_chars[j]
+            }
+          }
+        }
+      }
+    } else {
+      # Use numeric ticks
+      x_ticks <- pretty(scales$x_range, n = 5)
+      x_ticks <- x_ticks[x_ticks >= scales$x_range[1] & x_ticks <= scales$x_range[2]]
+      
+      for (tick in x_ticks) {
+        x_frac <- (tick - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
+        col <- round(x_frac * (ncol(rendered) - 1)) + left_margin + 1
+        
+        if (col >= left_margin && col <= width && x_row <= height) {
+          label <- format_axis_label(tick)
+          label_chars <- strsplit(label, "")[[1]]
+          
+          start_col <- col - floor(length(label_chars) / 2)
+          for (j in seq_along(label_chars)) {
+            if (start_col + j - 1 >= 1 && start_col + j - 1 <= width) {
+              output[x_row, start_col + j - 1] <- label_chars[j]
+            }
           }
         }
       }
@@ -801,20 +825,42 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
     if (panel_row == n_rows && show_axes) {
       x_row <- out_row_start + canvas_height + 1
       if (x_row <= height) {
-        x_ticks <- pretty(scales$x_range, n = 3)
-        x_ticks <- x_ticks[x_ticks >= scales$x_range[1] & x_ticks <= scales$x_range[2]]
-        
-        for (tick in x_ticks) {
-          x_frac <- (tick - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
-          col <- out_col_start + round(x_frac * (canvas_width - 1))
+        # Check if we have discrete labels
+        if (!is.null(scales$x_labels) && length(scales$x_labels) > 0) {
+          # Use discrete labels
+          for (i in seq_along(scales$x_labels)) {
+            pos <- scales$x_label_positions[i]
+            x_frac <- (pos - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
+            col <- out_col_start + round(x_frac * (canvas_width - 1))
+            
+            if (col >= 1 && col <= width) {
+              label <- scales$x_labels[i]
+              label_chars <- strsplit(label, "")[[1]]
+              start_col <- col - floor(length(label_chars) / 2)
+              for (j in seq_along(label_chars)) {
+                if (start_col + j - 1 >= 1 && start_col + j - 1 <= width) {
+                  output[x_row, start_col + j - 1] <- label_chars[j]
+                }
+              }
+            }
+          }
+        } else {
+          # Use numeric ticks
+          x_ticks <- pretty(scales$x_range, n = 3)
+          x_ticks <- x_ticks[x_ticks >= scales$x_range[1] & x_ticks <= scales$x_range[2]]
           
-          if (col >= 1 && col <= width) {
-            label <- format_axis_label(tick)
-            label_chars <- strsplit(label, "")[[1]]
-            start_col <- col - floor(length(label_chars) / 2)
-            for (i in seq_along(label_chars)) {
-              if (start_col + i - 1 >= 1 && start_col + i - 1 <= width) {
-                output[x_row, start_col + i - 1] <- label_chars[i]
+          for (tick in x_ticks) {
+            x_frac <- (tick - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
+            col <- out_col_start + round(x_frac * (canvas_width - 1))
+            
+            if (col >= 1 && col <= width) {
+              label <- format_axis_label(tick)
+              label_chars <- strsplit(label, "")[[1]]
+              start_col <- col - floor(length(label_chars) / 2)
+              for (j in seq_along(label_chars)) {
+                if (start_col + j - 1 >= 1 && start_col + j - 1 <= width) {
+                  output[x_row, start_col + j - 1] <- label_chars[j]
+                }
               }
             }
           }
@@ -917,13 +963,39 @@ create_panel_scales <- function(panel_params, plot_width, plot_height, has_borde
     y_max - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (y_max - y_min)
   }
   
+  # Check for discrete x-axis labels
+  x_labels <- NULL
+  x_label_positions <- NULL
+  if (!is.null(panel_params$x) && !is.null(panel_params$x$breaks)) {
+    x_labels <- panel_params$x$get_labels()
+    x_label_positions <- attr(panel_params$x$breaks, "pos")
+    if (is.null(x_label_positions)) {
+      x_label_positions <- seq_along(x_labels)
+    }
+  }
+  
+  # Check for discrete y-axis labels
+  y_labels <- NULL
+  y_label_positions <- NULL
+  if (!is.null(panel_params$y) && !is.null(panel_params$y$breaks)) {
+    y_labels <- panel_params$y$get_labels()
+    y_label_positions <- attr(panel_params$y$breaks, "pos")
+    if (is.null(y_label_positions)) {
+      y_label_positions <- seq_along(y_labels)
+    }
+  }
+  
   list(
     x = x_scale,
     y = y_scale,
     x_range = x_range,
     y_range = y_range,
     width = plot_width,
-    height = plot_height
+    height = plot_height,
+    x_labels = x_labels,
+    x_label_positions = x_label_positions,
+    y_labels = y_labels,
+    y_label_positions = y_label_positions
   )
 }
 
