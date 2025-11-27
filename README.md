@@ -2,8 +2,8 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/plotcli?color=green)](https://CRAN.R-project.org/package=plotcli)
 [![CRAN checks](https://badges.cranchecks.info/worst/plotcli.svg)](https://cran.r-project.org/web/checks/check_results_plotcli.html)
-[![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotcli)](http://www.r-pkg.org/pkg/plotcli)
-[![Downloads](http://cranlogs.r-pkg.org/badges/plotcli?color=blue)](http://www.r-pkg.org/pkg/plotcli)
+[![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotcli)](https://www.r-pkg.org/pkg/plotcli)
+[![Downloads](https://cranlogs.r-pkg.org/badges/plotcli?color=blue)](https://www.r-pkg.org/pkg/plotcli)
 
 
 ![Colored Density Plot on Terminal](docs/boxplot.jpg)
@@ -14,7 +14,7 @@ variety of plot types directly in your console using Unicode Braille characters 
 
 ## Features
 
-- **`ggplotcli2`**: Universal ggplot2 converter - render *any* ggplot in the terminal
+- **`ggplotcli`**: Universal ggplot2 converter - render *any* ggplot in the terminal
 - **14 Supported Geoms**: points, lines, bars, histograms, density, smooth, area, segments, and more
 - **Faceting**: Full support for `facet_wrap()` and `facet_grid()`
 - **Theme Auto-Detection**: Automatically respects ggplot2 themes (borders, grids)
@@ -36,7 +36,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
   labs(title = "MPG vs Weight")
 
 # Render in terminal
-ggplotcli2(p)
+ggplotcli(p)
 ```
 
 Output:
@@ -65,7 +65,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   labs(title = "MPG by Cylinders") +
   theme_bw()  # Automatically adds borders!
 
-ggplotcli2(p, width = 70, height = 16)
+ggplotcli(p, width = 70, height = 16)
 ```
 
 Output:
@@ -88,12 +88,12 @@ Output:
 
 ```r
 # With border and grid
-ggplotcli2(p, border = TRUE, grid = "major")
+ggplotcli(p, border = TRUE, grid = "major")
 
 # Different canvas types
-ggplotcli2(p, canvas_type = "braille")  # High resolution (default)
-ggplotcli2(p, canvas_type = "block")    # Medium resolution  
-ggplotcli2(p, canvas_type = "ascii")    # Basic ASCII
+ggplotcli(p, canvas_type = "braille")  # High resolution (default)
+ggplotcli(p, canvas_type = "block")    # Medium resolution  
+ggplotcli(p, canvas_type = "ascii")    # Basic ASCII
 ```
 
 ## Supported Geoms
@@ -122,16 +122,11 @@ install.packages("plotcli")
 devtools::install_github("cheuerde/plotcli")
 ```
 
-## Legacy Usage
+## Direct R6 Class Usage
 
-The original `ggplotcli()` function and `plotcli` R6 class are still available:
+For more control, use the `plotcli` R6 class directly:
 
 ```r
-# Using ggplotcli (original)
-p <- ggplot(iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
-  geom_boxplot()
-ggplotcli(p, braille = FALSE)
-
 # Using plotcli R6 class directly
 pc <- plotcli$new(width = 60, height = 20)
 pc$add_data(mtcars$wt, mtcars$mpg)

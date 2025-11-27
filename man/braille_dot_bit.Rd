@@ -16,17 +16,14 @@ The bit value for that dot position
 }
 \description{
 Returns the bit value for a specific dot position in a Braille cell.
-Braille cells have a 2x4 dot matrix:
+Braille cells have a 2x4 dot matrix with the following bit values:
 }
 \details{
-Col 0  Col 1
-  ┌────┬────┐
-Row 0 │ 0x01│ 0x08│
-  ├────┼────┤
-Row 1 │ 0x02│ 0x10│
-  ├────┼────┤
-Row 2 │ 0x04│ 0x20│
-  ├────┼────┤
-Row 3 │ 0x40│ 0x80│
-  └────┴────┘
+\preformatted{
+       Col 0  Col 1
+Row 0:  0x01   0x08
+Row 1:  0x02   0x10
+Row 2:  0x04   0x20
+Row 3:  0x40   0x80
+}
 }

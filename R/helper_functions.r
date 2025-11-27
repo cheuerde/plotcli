@@ -214,18 +214,15 @@ is_braille <- function(char) {
 #' Get Braille dot bit value
 #'
 #' Returns the bit value for a specific dot position in a Braille cell.
-#' Braille cells have a 2x4 dot matrix:
+#' Braille cells have a 2x4 dot matrix with the following bit values:
 #' 
-#'   Col 0  Col 1
-#'   ┌────┬────┐
-#' Row 0 │ 0x01│ 0x08│
-#'   ├────┼────┤
-#' Row 1 │ 0x02│ 0x10│
-#'   ├────┼────┤
-#' Row 2 │ 0x04│ 0x20│
-#'   ├────┼────┤
-#' Row 3 │ 0x40│ 0x80│
-#'   └────┴────┘
+#' \preformatted{
+#'        Col 0  Col 1
+#' Row 0:  0x01   0x08
+#' Row 1:  0x02   0x10
+#' Row 2:  0x04   0x20
+#' Row 3:  0x40   0x80
+#' }
 #'
 #' @param dot_row Row within the Braille cell (0-3, top to bottom)
 #' @param dot_col Column within the Braille cell (0-1, left to right)

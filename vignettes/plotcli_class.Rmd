@@ -1,10 +1,10 @@
 ---
-title: "Vignette For plotcli R6 class usage"
+title: "Using the plotcli R6 Class"
 author: "Claas Heuer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette plotcli_class}
+  %\VignetteIndexEntry{Using the plotcli R6 Class}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

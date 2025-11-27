@@ -1,10 +1,10 @@
 ---
-title: "ggplotcli2: Universal ggplot2 to Terminal Plotting"
+title: "ggplotcli: Universal ggplot2 to Terminal Plotting"
 author: "Claas Heuer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ggplotcli2: Universal ggplot2 to Terminal Plotting}
+  %\VignetteIndexEntry{ggplotcli: Universal ggplot2 to Terminal Plotting}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-`ggplotcli2` is a universal converter that renders any ggplot2 plot in the terminal using Unicode/ASCII characters. It automatically extracts data, aesthetics, and styling from ggplot objects.
+`ggplotcli` is a universal converter that renders any ggplot2 plot in the terminal using Unicode/ASCII characters. It automatically extracts data, aesthetics, and styling from ggplot objects.
 
 ## Basic Usage
 
@@ -32,7 +32,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
   labs(title = "MPG vs Weight by Cylinders")
 
 # Render in terminal
-ggplotcli2(p, width = 60, height = 14)
+ggplotcli(p, width = 60, height = 14)
 ```
 
 ## Supported Geoms
@@ -43,7 +43,7 @@ ggplotcli2(p, width = 60, height = 14)
 p <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   geom_point() +
   labs(title = "Iris: Sepal Dimensions")
-ggplotcli2(p, width = 60, height = 12)
+ggplotcli(p, width = 60, height = 12)
 ```
 
 ### Line Plots (geom_line)
@@ -53,7 +53,7 @@ df <- data.frame(x = 1:30, y = sin(1:30/4) * 10)
 p <- ggplot(df, aes(x, y)) +
   geom_line(color = "blue") +
   labs(title = "Sine Wave")
-ggplotcli2(p, width = 60, height = 12)
+ggplotcli(p, width = 60, height = 12)
 ```
 
 ### Histograms (geom_histogram)
@@ -62,7 +62,7 @@ ggplotcli2(p, width = 60, height = 12)
 p <- ggplot(mtcars, aes(x = mpg)) +
   geom_histogram(bins = 10, fill = "steelblue") +
   labs(title = "MPG Distribution")
-ggplotcli2(p, width = 60, height = 12)
+ggplotcli(p, width = 60, height = 12)
 ```
 
 ### Density Plots (geom_density)
@@ -71,7 +71,7 @@ ggplotcli2(p, width = 60, height = 12)
 p <- ggplot(mtcars, aes(x = mpg, color = factor(cyl))) +
   geom_density() +
   labs(title = "MPG Density by Cylinders")
-ggplotcli2(p, width = 60, height = 12)
+ggplotcli(p, width = 60, height = 12)
 ```
 
 ### Bar Charts (geom_col)
@@ -84,7 +84,7 @@ df <- data.frame(
 p <- ggplot(df, aes(x = category, y = value, fill = category)) +
   geom_col() +
   labs(title = "Category Values")
-ggplotcli2(p, width = 50, height = 12)
+ggplotcli(p, width = 50, height = 12)
 ```
 
 ## Combining Multiple Geoms
@@ -95,7 +95,7 @@ p <- ggplot(mtcars, aes(x = mpg)) +
   geom_histogram(aes(y = after_stat(density)), bins = 10, fill = "gray") +
   geom_density(color = "red") +
   labs(title = "Histogram with Density Overlay")
-ggplotcli2(p, width = 60, height = 12)
+ggplotcli(p, width = 60, height = 12)
 ```
 
 ```{r}
@@ -104,7 +104,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point(color = "gray") +
   geom_smooth(method = "loess", color = "red") +
   labs(title = "Scatter with LOESS Smooth")
-suppressMessages(ggplotcli2(p, width = 60, height = 12))
+suppressMessages(ggplotcli(p, width = 60, height = 12))
 ```
 
 ## Faceting
@@ -116,7 +116,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point(color = "blue") +
   facet_wrap(~cyl) +
   labs(title = "MPG vs Weight by Cylinders")
-ggplotcli2(p, width = 70, height = 16)
+ggplotcli(p, width = 70, height = 16)
 ```
 
 ### facet_grid
@@ -126,7 +126,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point(color = "green") +
   facet_grid(am ~ cyl) +
   labs(title = "MPG: AM (rows) x Cylinders (cols)")
-ggplotcli2(p, width = 70, height = 20)
+ggplotcli(p, width = 70, height = 20)
 ```
 
 ## Styling Options
@@ -139,18 +139,18 @@ p <- ggplot(mtcars, aes(x = hp, y = qsec)) +
   labs(title = "Quarter Mile Time vs HP")
 
 # With border
-ggplotcli2(p, width = 55, height = 12, border = TRUE)
+ggplotcli(p, width = 55, height = 12, border = TRUE)
 
 # With grid
-ggplotcli2(p, width = 55, height = 12, grid = "major")
+ggplotcli(p, width = 55, height = 12, grid = "major")
 
 # Both
-ggplotcli2(p, width = 55, height = 12, border = TRUE, grid = "major")
+ggplotcli(p, width = 55, height = 12, border = TRUE, grid = "major")
 ```
 
 ### Theme Auto-Detection
 
-ggplotcli2 automatically respects ggplot2 themes:
+ggplotcli automatically respects ggplot2 themes:
 
 ```{r}
 p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
@@ -158,10 +158,10 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   labs(title = "theme_bw() - Grid + Border")
 
 # theme_bw has both grid and border
-ggplotcli2(p + theme_bw(), width = 55, height = 12, border = "auto", grid = "auto")
+ggplotcli(p + theme_bw(), width = 55, height = 12, border = "auto", grid = "auto")
 
 # theme_classic has border but no grid
-ggplotcli2(p + theme_classic() + labs(title = "theme_classic() - Border Only"), 
+ggplotcli(p + theme_classic() + labs(title = "theme_classic() - Border Only"), 
            width = 55, height = 12, border = "auto", grid = "auto")
 ```
 
@@ -174,15 +174,15 @@ wave <- ggplot(data.frame(x = 1:25, y = sin(1:25/4)*8), aes(x, y)) +
   geom_line(color = "green")
 
 # Braille (highest resolution)
-ggplotcli2(wave + labs(title = "Braille Canvas"), 
+ggplotcli(wave + labs(title = "Braille Canvas"), 
            width = 50, height = 8, canvas_type = "braille")
 
 # Block (medium resolution)
-ggplotcli2(wave + labs(title = "Block Canvas"), 
+ggplotcli(wave + labs(title = "Block Canvas"), 
            width = 50, height = 8, canvas_type = "block")
 
 # ASCII (basic, most compatible)
-ggplotcli2(wave + labs(title = "ASCII Canvas"), 
+ggplotcli(wave + labs(title = "ASCII Canvas"), 
            width = 50, height = 8, canvas_type = "ascii")
 ```
 

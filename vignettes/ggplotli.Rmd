@@ -1,5 +1,5 @@
 ---
-title: "Vignette For ggplotcli"
+title: "Introduction to ggplotcli"
 author: "Claas Heuer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -18,18 +18,47 @@ knitr::opts_chunk$set(
 
 ## Using `ggplotcli` with `ggplot2`
 
+The `ggplotcli()` function converts any ggplot2 plot to a terminal-based visualization.
+
 ```{r}
-library(plotcli)  
+library(plotcli)
+library(ggplot2)
 
-mtcars$cf = as.character(mtcars$cyl)
-
+# Create a ggplot with points and smooth line
 mtcars_ggplot <- ggplot(mtcars, aes(x = mpg, y = wt)) +  
   geom_point() +  
   geom_smooth(method = "lm", color = "red") +
   labs(title = "Mtcars Dataset with Regression Line",  
        x = "Miles per Gallon",  
        y = "Weight")  
-  
-pp = ggplotcli(mtcars_ggplot, braille = FALSE)  
-pp$print_plot()  
+
+# Render in terminal
+suppressMessages(ggplotcli(mtcars_ggplot, width = 60, height = 15))
+```
+
+## Canvas Types
+
+You can choose different rendering styles:
+
+```{r}
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) + 
+  geom_point(color = "blue") +
+  labs(title = "Braille Canvas (default)")
+
+# High resolution with Braille
+ggplotcli(p, width = 50, height = 10, canvas_type = "braille")
+
+# ASCII for maximum compatibility
+ggplotcli(p + labs(title = "ASCII Canvas"), width = 50, height = 10, canvas_type = "ascii")
+```
+
+## Styling Options
+
+```{r}
+p <- ggplot(mtcars, aes(x = hp, y = qsec)) +
+  geom_point(color = "green") +
+  labs(title = "With Border and Grid")
+
+# Add border and grid
+ggplotcli(p, width = 50, height = 10, border = TRUE, grid = "major")
 ```

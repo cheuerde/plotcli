@@ -15,3 +15,4 @@ Character string of the column name, or NULL
 \description{
 Handles quosures, simple symbols, and calls like factor(cyl)
 }
+\keyword{internal}

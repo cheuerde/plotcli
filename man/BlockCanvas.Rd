@@ -10,7 +10,7 @@ Block Canvas Class
 }
 \details{
 Canvas using Unicode block elements for 2x vertical resolution.
-Uses half-block characters: ▀ (upper), ▄ (lower), █ (full)
+Uses half-block characters: upper half (U+2580), lower half (U+2584), full block (U+2588).
 
 Resolution: 1x2 (1 horizontal, 2 vertical pixels per character)
 }

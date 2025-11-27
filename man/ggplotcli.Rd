@@ -2,22 +2,78 @@
 % Please edit documentation in R/ggplotcli.r
 \name{ggplotcli}
 \alias{ggplotcli}
-\title{ggplotcli - Render ggplot objects in the terminal}
+\title{ggplotcli - Render ggplot2 objects in the terminal}
 \usage{
-ggplotcli(ggplot_obj, plot_width = 80, plot_height = 40, braille = TRUE)
+ggplotcli(
+  p,
+  width = 60,
+  height = 20,
+  canvas_type = "braille",
+  border = "auto",
+  grid = "none",
+  show_axes = TRUE,
+  axis_labels = TRUE,
+  legend = "auto",
+  title_align = "center",
+  subtitle = TRUE,
+  caption = TRUE,
+  title = NULL
+)
 }
 \arguments{
-\item{ggplot_obj}{A ggplot object to be rendered in the terminal.}
+\item{p}{A ggplot2 object to render}
 
-\item{plot_width}{Width of the terminal plot in characters (default: 80).}
+\item{width}{Character width of the plot (default: 60)}
 
-\item{plot_height}{Height of the terminal plot in characters (default: 40).}
+\item{height}{Character height of the plot (default: 20)}
 
-\item{braille}{Use Braille characters for higher resolution (default: TRUE).}
+\item{canvas_type}{Type of canvas: "braille" (high-res), "block" (medium), or "ascii" (basic). Default: "braille"}
+
+\item{border}{Draw border around plot. "auto" uses ggplot theme, or TRUE/FALSE (default: "auto")}
+
+\item{grid}{Grid lines: "none", "major", "minor", "both", or "auto" (default: "none")}
+
+\item{show_axes}{Whether to show axis values (default: TRUE)}
+
+\item{axis_labels}{Whether to show axis labels from ggplot (default: TRUE)}
+
+\item{legend}{Legend display: "auto", "right", "bottom", "none" (default: "auto")}
+
+\item{title_align}{Title alignment: "center" or "left" (default: "center")}
+
+\item{subtitle}{Whether to show subtitle (default: TRUE)}
+
+\item{caption}{Whether to show caption (default: TRUE)}
+
+\item{title}{Optional title override (NULL uses ggplot title)}
 }
 \value{
-A TerminalPlot object.
+Invisibly returns the canvas object
 }
 \description{
-This function takes a ggplot object and renders it in the terminal using ASCII or Braille characters.
+Convert any ggplot2 plot to a terminal-based visualization using Unicode 
+Braille characters or ASCII. Supports 14+ geom types, faceting, themes,
+and color aesthetics.
+}
+\examples{
+library(ggplot2)
+
+# Basic scatter plot
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
+ggplotcli(p)
+
+# With styling
+ggplotcli(p, border = TRUE, grid = "major")
+
+# Faceted plot
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) + 
+  geom_point() + 
+  facet_wrap(~cyl)
+ggplotcli(p, width = 70, height = 16)
+
+# Multiple geoms
+p <- ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 10) +
+  geom_density(color = "red")
+ggplotcli(p)
 }

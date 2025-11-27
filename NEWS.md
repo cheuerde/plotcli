@@ -2,9 +2,10 @@
 
 ## Major New Features
 
-### ggplotcli2: Universal ggplot2 Converter
+### Enhanced ggplotcli: Universal ggplot2 Converter
 
-A new function `ggplotcli2()` that renders any ggplot2 plot in the terminal:
+The `ggplotcli()` function has been completely rewritten to render any ggplot2 
+plot in the terminal:
 
 * **14 Supported Geoms**: `geom_point`, `geom_line`, `geom_path`, `geom_bar`, 
   `geom_col`, `geom_histogram`, `geom_density`, `geom_smooth`, `geom_area`, 
@@ -44,7 +45,7 @@ support for additional ggplot2 geoms.
 
 ## Documentation
 
-* New vignette: "ggplotcli2: Universal ggplot2 to Terminal Plotting"
+* New vignette: "ggplotcli: Universal ggplot2 to Terminal Plotting"
 
 ---
 
@@ -53,5 +54,4 @@ support for additional ggplot2 geoms.
 * Initial CRAN release
 * Basic terminal plotting with `plotcli` R6 class
 * Support for scatter, line, bar, and box plots
-* Original `ggplotcli()` function for basic ggplot2 conversion
-
+* Basic `ggplotcli()` function for ggplot2 conversion

@@ -395,17 +395,14 @@ AsciiCanvas <- R6Class("AsciiCanvas",
 #' High-resolution canvas using Unicode Braille patterns.
 #' Resolution: 2x4 (2 horizontal, 4 vertical dots per character = 8x resolution)
 #'
-#' Braille dot layout:
-#'   Col 0  Col 1     Bit values:
-#'   ┌────┬────┐      ┌────┬────┐
-#' Row 0 │ 1  │ 4  │    │0x01│0x08│
-#'   ├────┼────┤      ├────┼────┤
-#' Row 1 │ 2  │ 5  │    │0x02│0x10│
-#'   ├────┼────┤      ├────┼────┤
-#' Row 2 │ 3  │ 6  │    │0x04│0x20│
-#'   ├────┼────┤      ├────┼────┤
-#' Row 3 │ 7  │ 8  │    │0x40│0x80│
-#'   └────┴────┘      └────┴────┘
+#' Braille dot layout (dot numbers and bit values):
+#' \preformatted{
+#'        Col 0  Col 1     Bit values
+#' Row 0:   1      4        0x01  0x08
+#' Row 1:   2      5        0x02  0x10
+#' Row 2:   3      6        0x04  0x20
+#' Row 3:   7      8        0x40  0x80
+#' }
 #'
 #' @export
 BrailleCanvas <- R6Class("BrailleCanvas",
@@ -490,7 +487,7 @@ BrailleCanvas <- R6Class("BrailleCanvas",
 #' Block Canvas Class
 #'
 #' Canvas using Unicode block elements for 2x vertical resolution.
-#' Uses half-block characters: ▀ (upper), ▄ (lower), █ (full)
+#' Uses half-block characters: upper half (U+2580), lower half (U+2584), full block (U+2588).
 #'
 #' Resolution: 1x2 (1 horizontal, 2 vertical pixels per character)
 #'
