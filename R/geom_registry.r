@@ -77,9 +77,10 @@ is_geom_registered <- function(geom_name) {
 #' @param built Result from ggplot_build()
 #' @param plot_width Canvas pixel width
 #' @param plot_height Canvas pixel height
+#' @param has_border Whether a border will be drawn (adds padding)
 #' @return List with x_scale and y_scale functions
 #' @export
-create_scales <- function(built, plot_width, plot_height) {
+create_scales <- function(built, plot_width, plot_height, has_border = FALSE) {
   # Get the panel parameters (contains scale ranges)
   layout <- built$layout
   panel_params <- layout$panel_params[[1]]
@@ -96,14 +97,31 @@ create_scales <- function(built, plot_width, plot_height) {
     y_range <- range(built$data[[1]]$y, na.rm = TRUE)
   }
   
+  # Add padding if border is present to prevent data from overlapping border
+  padding <- if (has_border) 2 else 0
+  x_min <- 1 + padding
+  x_max <- plot_width - padding
+  y_min <- 1 + padding
+  y_max <- plot_height - padding
+  
+  # Ensure we have valid ranges
+  if (x_max <= x_min) {
+    x_min <- 1
+    x_max <- plot_width
+  }
+  if (y_max <= y_min) {
+    y_min <- 1
+    y_max <- plot_height
+  }
+  
   # Create scaling functions
   x_scale <- function(x) {
-    ((x - x_range[1]) / (x_range[2] - x_range[1])) * (plot_width - 1) + 1
+    ((x - x_range[1]) / (x_range[2] - x_range[1])) * (x_max - x_min) + x_min
   }
   
   y_scale <- function(y) {
     # Invert Y because canvas has origin at top-left
-    plot_height - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (plot_height - 1)
+    y_max - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (y_max - y_min)
   }
   
   list(

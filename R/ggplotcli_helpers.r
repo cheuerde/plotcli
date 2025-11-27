@@ -150,8 +150,9 @@ render_single_panel <- function(built, width, height, canvas_type, style_opts) {
   # Create canvas for plot area
   canvas <- create_canvas(plot_width, plot_height, canvas_type)
   
-  # Create scales
-  scales <- create_scales(built, canvas$pixel_width, canvas$pixel_height)
+  # Create scales (with border padding if needed)
+  scales <- create_scales(built, canvas$pixel_width, canvas$pixel_height, 
+                          has_border = style_opts$border)
   
   # Draw grid lines first (behind data)
   if (style_opts$grid != "none") {
@@ -543,6 +544,11 @@ build_plot_output <- function(canvas, scales, width, height, show_axes, title) {
 #' @return Formatted string
 #' @keywords internal
 format_axis_label <- function(value) {
+  # Handle exact zero
+  if (value == 0) {
+    return("0")
+  }
+  # Use scientific notation for very small or very large numbers
   if (abs(value) < 0.01 || abs(value) >= 10000) {
     sprintf("%.1e", value)
   } else if (abs(value) < 1) {
@@ -675,9 +681,10 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
     
     canvas <- create_canvas(canvas_width, canvas_height, canvas_type)
     
-    # Create scales for this panel
+    # Create scales for this panel (with border padding if needed)
     panel_params <- built$layout$panel_params[[panel_idx]]
-    scales <- create_panel_scales(panel_params, canvas$pixel_width, canvas$pixel_height)
+    scales <- create_panel_scales(panel_params, canvas$pixel_width, canvas$pixel_height, 
+                                   has_border = style_opts$border)
     
     # Draw grid lines first (behind data)
     if (style_opts$grid != "none") {
@@ -816,9 +823,11 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
 #' @param panel_params Panel parameters from ggplot_build
 #' @param plot_width Pixel width
 #' @param plot_height Pixel height
+#' @param has_border Whether a border will be drawn (adds padding)
 #' @return List with scale functions
 #' @keywords internal
-create_panel_scales <- function(panel_params, plot_width, plot_height) {
+create_panel_scales <- function(panel_params, plot_width, plot_height, has_border = FALSE) {
+
   # Get x and y ranges from panel params
   x_range <- panel_params$x.range
   y_range <- panel_params$y.range
@@ -827,13 +836,30 @@ create_panel_scales <- function(panel_params, plot_width, plot_height) {
   if (is.null(x_range)) x_range <- c(0, 1)
   if (is.null(y_range)) y_range <- c(0, 1)
   
+  # Add padding if border is present to prevent data from overlapping border
+  padding <- if (has_border) 2 else 0
+  x_min <- 1 + padding
+  x_max <- plot_width - padding
+  y_min <- 1 + padding
+  y_max <- plot_height - padding
+  
+  # Ensure we have valid ranges
+  if (x_max <= x_min) {
+    x_min <- 1
+    x_max <- plot_width
+  }
+  if (y_max <= y_min) {
+    y_min <- 1
+    y_max <- plot_height
+  }
+  
   # Create scaling functions
   x_scale <- function(x) {
-    ((x - x_range[1]) / (x_range[2] - x_range[1])) * (plot_width - 1) + 1
+    ((x - x_range[1]) / (x_range[2] - x_range[1])) * (x_max - x_min) + x_min
   }
   
   y_scale <- function(y) {
-    plot_height - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (plot_height - 1)
+    y_max - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (y_max - y_min)
   }
   
   list(

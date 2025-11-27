@@ -207,8 +207,13 @@ remove_color_codes <- function(s) {
 #' @examples
 #' is_braille("A")
 is_braille <- function(char) {
+    if (is.null(char) || length(char) == 0 || nchar(char) == 0) return(FALSE)
+    # Get the first character's code (ignore ANSI escape sequences)
     code <- utf8ToInt(char)
-    return((code >= 0x2800 && code <= 0x28FF))
+    if (length(code) == 0) return(FALSE)
+    # Check only the first code point
+    code <- code[1]
+    return(code >= 0x2800 && code <= 0x28FF)
 }
 
 #' Get Braille dot bit value
