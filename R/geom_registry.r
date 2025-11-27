@@ -670,6 +670,9 @@ geom_text_handler <- function(data, canvas, scales, params, style_opts = NULL) {
 
 #' Convert ggplot2 color to terminal color name
 #'
+#' Maps any color to the closest terminal color using hue-based matching.
+#' Terminal colors available: red, green, blue, yellow, magenta, cyan, white, black, silver
+#'
 #' @param color A color value (hex, name, or R color)
 #' @return A terminal color name (blue, red, green, etc.) or NULL
 #' @export
@@ -684,38 +687,69 @@ color_to_term <- function(color) {
   
   # Try to convert hex/named color to RGB and find closest terminal color
   tryCatch({
-    rgb <- col2rgb(color)
-    r <- rgb[1, 1]
-    g <- rgb[2, 1]
-    b <- rgb[3, 1]
+    rgb_val <- col2rgb(color)
+    r <- rgb_val[1, 1]
+    g <- rgb_val[2, 1]
+    b <- rgb_val[3, 1]
     
-    # Simple heuristic: find dominant channel
+    # Check for near-black or near-white first
     max_val <- max(r, g, b)
     min_val <- min(r, g, b)
     
-    if (max_val < 50) return("black")
-    if (min_val > 200) return("white")
+    if (max_val < 40) return("black")
+    if (min_val > 220) return("white")
     
-    # Check for grayscale
-    if (max_val - min_val < 30) {
-      if (max_val > 180) return("white")
-      if (max_val > 100) return("silver")
+    # Check for grayscale (low saturation)
+    if (max_val - min_val < 25) {
+      if (max_val > 170) return("white")
+      if (max_val > 85) return("silver")
       return("black")
     }
     
-    # Find dominant color
-    if (r >= g && r >= b) {
-      if (g > b && g > 100) return("yellow")
-      if (b > g && b > 100) return("magenta")
-      return("red")
-    } else if (g >= r && g >= b) {
-      if (r > b && r > 100) return("yellow")
-      if (b > r && b > 100) return("cyan")
-      return("green")
+    # For chromatic colors, use hue-based matching
+    # Convert to HSV-like hue calculation
+    chroma <- max_val - min_val
+    
+    if (chroma == 0) {
+      return("silver")
+    }
+    
+    # Calculate hue (0-360 degrees)
+    if (max_val == r) {
+      hue <- 60 * (((g - b) / chroma) %% 6)
+    } else if (max_val == g) {
+      hue <- 60 * ((b - r) / chroma + 2)
     } else {
-      if (r > g && r > 100) return("magenta")
-      if (g > r && g > 100) return("cyan")
+      hue <- 60 * ((r - g) / chroma + 4)
+    }
+    
+    if (hue < 0) hue <- hue + 360
+    
+    # Map hue to terminal colors
+    # Optimized boundaries based on ggplot2's default palette distribution:
+    # - ggplot2 8-group hues: 4, 44, 77, 152, 182, 200, 274, 319
+    # - ggplot2 16-group hues: 4, 33, 44, 57, 77, 117, 152, 168, 182, 192, 200, 232, 274, 300, 319, 337
+    #
+    # Terminal color assignments:
+    # Red: 0-20, 325-360 (salmon, pink-red)
+    # Yellow: 20-65 (orange, gold, olive)
+    # Green: 65-140 (lime, green)
+    # Cyan: 140-190 (teal, cyan)
+    # Blue: 190-260 (azure, blue, violet-blue)
+    # Magenta: 260-325 (purple, magenta, pink)
+    
+    if (hue < 20 || hue >= 325) {
+      return("red")
+    } else if (hue < 65) {
+      return("yellow")
+    } else if (hue < 140) {
+      return("green")
+    } else if (hue < 190) {
+      return("cyan")
+    } else if (hue < 260) {
       return("blue")
+    } else {
+      return("magenta")
     }
   }, error = function(e) {
     return(NULL)
