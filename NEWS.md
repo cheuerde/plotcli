@@ -7,9 +7,11 @@
 The `ggplotcli()` function has been completely rewritten to render any ggplot2 
 plot in the terminal:
 
-* **14 Supported Geoms**: `geom_point`, `geom_line`, `geom_path`, `geom_bar`, 
+* **15 Supported Geoms**: `geom_point`, `geom_line`, `geom_path`, `geom_bar`, 
   `geom_col`, `geom_histogram`, `geom_density`, `geom_smooth`, `geom_area`, 
-  `geom_segment`, `geom_hline`, `geom_vline`, `geom_rect`, `geom_text`
+  `geom_segment`, `geom_hline`, `geom_vline`, `geom_rect`, `geom_text`, `geom_boxplot`
+
+* **Legend Support**: Automatic legends for color and fill aesthetics
 
 * **Faceting Support**: Both `facet_wrap()` and `facet_grid()` work automatically
 

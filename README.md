@@ -109,8 +109,8 @@ ggplotcli(p, canvas_type = "ascii")    # Basic ASCII
 | `geom_segment`, `geom_hline`, `geom_vline` | ✓ |
 | `geom_rect` | ✓ |
 | `geom_text` | ✓ |
+| `geom_boxplot` | ✓ |
 | `geom_tile` (heatmaps) | Planned |
-| `geom_boxplot` | Planned |
 
 ## Installation
 

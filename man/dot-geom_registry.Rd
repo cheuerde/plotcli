@@ -5,7 +5,7 @@
 \alias{.geom_registry}
 \title{Geom Registry Environment}
 \format{
-An object of class \code{environment} of length 14.
+An object of class \code{environment} of length 15.
 }
 \usage{
 .geom_registry

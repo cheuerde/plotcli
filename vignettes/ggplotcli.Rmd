@@ -32,7 +32,7 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
   labs(title = "MPG vs Weight by Cylinders")
 
 # Render in terminal
-ggplotcli(p, width = 60, height = 14)
+ggplotcli(p, width = 60, height = 20)
 ```
 
 ## Supported Geoms
@@ -43,7 +43,7 @@ ggplotcli(p, width = 60, height = 14)
 p <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
   geom_point() +
   labs(title = "Iris: Sepal Dimensions")
-ggplotcli(p, width = 60, height = 12)
+ggplotcli(p, width = 60, height = 40)
 ```
 
 ### Line Plots (geom_line)
@@ -158,11 +158,11 @@ p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
   labs(title = "theme_bw() - Grid + Border")
 
 # theme_bw has both grid and border
-ggplotcli(p + theme_bw(), width = 55, height = 12, border = "auto", grid = "auto")
+ggplotcli(p + theme_bw(), width = 60, height = 20, border = "auto", grid = "auto")
 
 # theme_classic has border but no grid
 ggplotcli(p + theme_classic() + labs(title = "theme_classic() - Border Only"), 
-           width = 55, height = 12, border = "auto", grid = "auto")
+           width = 60, height = 20, border = "auto", grid = "auto")
 ```
 
 ## Canvas Types
@@ -199,11 +199,12 @@ ggplotcli(wave + labs(title = "ASCII Canvas"),
 | geom_segment, geom_hline, geom_vline | ✓ |
 | geom_rect | ✓ |
 | geom_text | ✓ |
+| geom_boxplot | ✓ |
 | Color/fill aesthetics | ✓ |
+| Legends | ✓ |
 | facet_wrap, facet_grid | ✓ |
 | Titles, subtitles, captions | ✓ |
 | Theme auto-detection | ✓ |
 | geom_tile (heatmaps) | Planned |
-| geom_boxplot | Planned |
 | geom_violin | Planned |
 

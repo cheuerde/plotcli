@@ -422,6 +422,82 @@ geom_density_handler <- function(data, canvas, scales, params) {
 geom_histogram_handler <- geom_bar_handler
 
 
+#' GeomBoxplot Handler
+#'
+#' Renders boxplots with whiskers, box, median line, and outliers
+#' @keywords internal
+geom_boxplot_handler <- function(data, canvas, scales, params) {
+  # Get colors
+  fill_colors <- if ("fill" %in% names(data)) data$fill else rep("white", nrow(data))
+  outline_colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+  
+  for (i in seq_len(nrow(data))) {
+    # Get boxplot statistics
+    x <- data$x[i]
+    xmin <- data$xmin[i]
+    xmax <- data$xmax[i]
+    ymin <- data$ymin[i]  # Lower whisker
+    lower <- data$lower[i]  # Q1
+    middle <- data$middle[i]  # Median
+    upper <- data$upper[i]  # Q3
+    ymax <- data$ymax[i]  # Upper whisker
+    outliers <- data$outliers[[i]]
+    
+    # Get color
+    fill_color <- fill_colors[i]
+    if (!is.null(fill_color) && !is.na(fill_color)) {
+      fill_color <- color_to_term(fill_color)
+    } else {
+      fill_color <- NULL
+    }
+    
+    outline_color <- outline_colors[i]
+    if (!is.null(outline_color) && !is.na(outline_color)) {
+      outline_color <- color_to_term(outline_color)
+    } else {
+      outline_color <- fill_color
+    }
+    
+    # Scale coordinates
+    sx <- scales$x(x)
+    sxmin <- scales$x(xmin)
+    sxmax <- scales$x(xmax)
+    symin <- scales$y(ymin)
+    slower <- scales$y(lower)
+    smiddle <- scales$y(middle)
+    supper <- scales$y(upper)
+    symax <- scales$y(ymax)
+    
+    # Draw whiskers (vertical lines from box to whisker ends)
+    # Lower whisker
+    canvas$draw_segment(round(sx), round(slower), round(sx), round(symin), color = fill_color)
+    # Upper whisker  
+    canvas$draw_segment(round(sx), round(supper), round(sx), round(symax), color = fill_color)
+    
+    # Draw whisker caps (horizontal lines at whisker ends)
+    cap_width <- (sxmax - sxmin) / 2
+    canvas$draw_segment(round(sx - cap_width/2), round(symin), round(sx + cap_width/2), round(symin), color = fill_color)
+    canvas$draw_segment(round(sx - cap_width/2), round(symax), round(sx + cap_width/2), round(symax), color = fill_color)
+    
+    # Draw box (rectangle from Q1 to Q3)
+    canvas$draw_rect(round(sxmin), round(supper), round(sxmax), round(slower), color = fill_color)
+    
+    # Draw median line
+    canvas$draw_segment(round(sxmin), round(smiddle), round(sxmax), round(smiddle), color = fill_color)
+    
+    # Draw outliers
+    if (length(outliers) > 0 && !all(is.na(outliers))) {
+      for (out in outliers) {
+        if (!is.na(out)) {
+          sy_out <- scales$y(out)
+          canvas$set_pixel(round(sx), round(sy_out), fill_color)
+        }
+      }
+    }
+  }
+}
+
+
 #' GeomText Handler
 #'
 #' Renders text labels
@@ -528,6 +604,7 @@ color_to_term <- function(color) {
   register_geom("GeomDensity", geom_density_handler)
   register_geom("GeomHistogram", geom_histogram_handler)
   register_geom("GeomText", geom_text_handler)
+  register_geom("GeomBoxplot", geom_boxplot_handler)
 }
 
 # Register geoms when the file is sourced
