@@ -1,11 +1,14 @@
 Package: plotcli
 Title: Command Line Interface Plotting
-Version: 0.1.0
-Date: 2024-04-01
+Version: 0.2.0
+Date: 2025-11-27
 Authors@R: c(person("Claas", "Heuer", role = c("aut", "cre"), email = "claasheuer@gmail.com"))
 Description: The 'plotcli' package provides terminal-based plotting in R.
-             It supports colored scatter plots, line plots, bar plots, and box plots. The package allows users 
-             to customize plot appearance, add titles, labels, ticks, and legends, and output the plot as a text-based visualization.
+             It supports colored scatter plots, line plots, bar plots, histograms, 
+             density plots, and more. The package includes 'ggplotcli2', a universal 
+             converter that renders any 'ggplot2' plot in the terminal using Unicode 
+             Braille characters or ASCII. Features include faceting support, automatic 
+             theme detection, and multiple canvas types.
 License: LGPL-3
 URL: https://github.com/cheuerde/plotcli
 Encoding: UTF-8
@@ -16,5 +19,5 @@ Imports: utils, crayon, knitr, rmarkdown, stringr, rlang
 Suggests:
     testthat (>= 3.0.0)
 NeedsCompilation: yes
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Config/testthat/edition: 3
