@@ -1,3 +1,7 @@
+#' Null-coalescing operator (if rlang not available)
+#' @keywords internal
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 #' Extract Plot Style from ggplot Theme
 #' @keywords internal
 extract_plot_style <- function(built, border, grid, legend) {
