@@ -13,5 +13,6 @@ color_to_term(color)
 A terminal color name (blue, red, green, etc.) or NULL
 }
 \description{
-Convert ggplot2 color to terminal color name
+If init_color_mapping() was called, uses the pre-computed mapping.
+Otherwise falls back to simple hue-based matching.
 }

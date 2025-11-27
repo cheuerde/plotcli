@@ -26,6 +26,19 @@ plot in the terminal:
 * **Styling Options**: Configurable borders, grid lines, titles, subtitles, 
   captions, and axis labels
 
+### Boxplot Rendering
+
+* New `boxplot_style` parameter: `"ascii"` (box-drawing characters) or `"braille"`
+* Renders whiskers, box (Q1-Q3), median line, and outliers
+* Perfect centering of whiskers and outliers
+
+### Optimized Color Mapping
+
+* Intelligent color assignment minimizes repetition across groups
+* 6 groups get 6 distinct terminal colors
+* 8+ groups use all available colors before repeating
+* Colors sorted by hue for visual consistency
+
 ### Canvas Abstraction Layer
 
 New R6-based canvas system providing:
@@ -44,10 +57,14 @@ support for additional ggplot2 geoms.
 * Improved Braille bit mapping for more accurate scatter and line plots
 * Better color handling for multi-group aesthetics
 * Fixed issues with quosure parsing in aesthetic mappings
+* Fixed axis label formatting (0 now displays as "0", not "0.0e+0")
+* Fixed border overlap issue - data no longer appears on/within borders
+* Fixed is_braille error with ANSI color codes
 
 ## Documentation
 
-* New vignette: "ggplotcli: Universal ggplot2 to Terminal Plotting"
+* Comprehensive vignette: "ggplotcli: Universal ggplot2 to Terminal Plotting"
+* Showcase examples demonstrating maximum complexity plots
 
 ---
 

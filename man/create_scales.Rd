@@ -4,7 +4,7 @@
 \alias{create_scales}
 \title{Create Scale Object from ggplot_build data}
 \usage{
-create_scales(built, plot_width, plot_height)
+create_scales(built, plot_width, plot_height, has_border = FALSE)
 }
 \arguments{
 \item{built}{Result from ggplot_build()}
@@ -12,6 +12,8 @@ create_scales(built, plot_width, plot_height)
 \item{plot_width}{Canvas pixel width}
 
 \item{plot_height}{Canvas pixel height}
+
+\item{has_border}{Whether a border will be drawn (adds padding)}
 }
 \value{
 List with x_scale and y_scale functions

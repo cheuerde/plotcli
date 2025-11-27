@@ -4,11 +4,12 @@ Version: 0.2.0
 Date: 2025-11-27
 Authors@R: c(person("Claas", "Heuer", role = c("aut", "cre"), email = "claasheuer@gmail.com"))
 Description: The 'plotcli' package provides terminal-based plotting in R.
-             It supports colored scatter plots, line plots, bar plots, histograms, 
-             density plots, and more. The package includes 'ggplotcli2', a universal 
-             converter that renders any 'ggplot2' plot in the terminal using Unicode 
-             Braille characters or ASCII. Features include faceting support, automatic 
-             theme detection, and multiple canvas types.
+             It supports colored scatter plots, line plots, bar plots, boxplots, 
+             histograms, density plots, and more. The 'ggplotcli()' function is a 
+             universal converter that renders any 'ggplot2' plot in the terminal 
+             using Unicode Braille characters or ASCII. Features include support for 
+             15+ geom types, faceting (facet_wrap/facet_grid), automatic theme 
+             detection, legends, optimized color mapping, and multiple canvas types.
 License: LGPL-3
 URL: https://github.com/cheuerde/plotcli
 Encoding: UTF-8

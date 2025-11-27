@@ -4,7 +4,7 @@
 \alias{create_panel_scales}
 \title{Create Scales for a Single Panel}
 \usage{
-create_panel_scales(panel_params, plot_width, plot_height)
+create_panel_scales(panel_params, plot_width, plot_height, has_border = FALSE)
 }
 \arguments{
 \item{panel_params}{Panel parameters from ggplot_build}
@@ -12,6 +12,8 @@ create_panel_scales(panel_params, plot_width, plot_height)
 \item{plot_width}{Pixel width}
 
 \item{plot_height}{Pixel height}
+
+\item{has_border}{Whether a border will be drawn (adds padding)}
 }
 \value{
 List with scale functions
