@@ -4,7 +4,7 @@
 \alias{geom_density_handler}
 \title{GeomDensity Handler}
 \usage{
-geom_density_handler(data, canvas, scales, params)
+geom_density_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders density curves

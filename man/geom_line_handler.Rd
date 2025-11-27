@@ -4,7 +4,7 @@
 \alias{geom_line_handler}
 \title{GeomLine Handler}
 \usage{
-geom_line_handler(data, canvas, scales, params)
+geom_line_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders connected lines

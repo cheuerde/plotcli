@@ -25,7 +25,7 @@ get_data_subset <- function(geom_name, data, aes, p_build) {
           out$x = rep(1, length(out$y))
 
   }
-    
+
   if(!geom_name %in% c("GeomDensity", "GeomSmooth", "GeomBoxplot", "GeomBar")) {
 
           out$x = data[[rlang::as_name(aes$x)]]
@@ -84,7 +84,7 @@ safe_aes_name <- function(aes_expr) {
 #' ggplotcli - Render ggplot2 objects in the terminal
 #'
 #' Convert any ggplot2 plot to a terminal-based visualization using Unicode 
-#' Braille characters or ASCII. Supports 14+ geom types, faceting, themes,
+#' Braille characters or ASCII. Supports 15+ geom types, faceting, themes,
 #' and color aesthetics.
 #'
 #' @param p A ggplot2 object to render
@@ -100,6 +100,8 @@ safe_aes_name <- function(aes_expr) {
 #' @param subtitle Whether to show subtitle (default: TRUE)
 #' @param caption Whether to show caption (default: TRUE)
 #' @param title Optional title override (NULL uses ggplot title)
+#' @param boxplot_style Style for boxplots: "ascii" uses box-drawing characters (default), 
+#'   "braille" uses Braille dots like other geoms
 #'
 #' @return Invisibly returns the canvas object
 #' @export
@@ -137,7 +139,8 @@ ggplotcli <- function(p,
                       title_align = "center",
                       subtitle = TRUE,
                       caption = TRUE,
-                      title = NULL) {
+                      title = NULL,
+                      boxplot_style = "ascii") {
   
   # Build the plot to get computed data
   built <- ggplot2::ggplot_build(p)
@@ -156,7 +159,8 @@ ggplotcli <- function(p,
     axis_labels = axis_labels,
     legend = style$legend,
     title_align = title_align,
-    labels = labels
+    labels = labels,
+    boxplot_style = boxplot_style
   )
   
   # Check for faceting
@@ -168,7 +172,7 @@ facet_info <- get_facet_info(layout)
     # Render faceted plot
     render_faceted_plot(built, facet_info, width, height, canvas_type, 
                         style_opts)
-  } else {
+    } else {
     # Render single panel plot
     render_single_panel(built, width, height, canvas_type, style_opts)
   }

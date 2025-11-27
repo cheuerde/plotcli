@@ -4,9 +4,10 @@
 \alias{geom_boxplot_handler}
 \title{GeomBoxplot Handler}
 \usage{
-geom_boxplot_handler(data, canvas, scales, params)
+geom_boxplot_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
-Renders boxplots with whiskers, box, median line, and outliers
+Renders boxplots with whiskers, box, median line, and outliers.
+Supports two styles: "ascii" (box-drawing characters) and "braille" (Braille dots).
 }
 \keyword{internal}

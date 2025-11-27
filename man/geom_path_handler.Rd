@@ -4,7 +4,7 @@
 \alias{geom_path_handler}
 \title{GeomPath Handler}
 \usage{
-geom_path_handler(data, canvas, scales, params)
+geom_path_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders connected paths (order by data, not x)

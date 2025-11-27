@@ -4,7 +4,7 @@
 \alias{geom_segment_handler}
 \title{GeomSegment Handler}
 \usage{
-geom_segment_handler(data, canvas, scales, params)
+geom_segment_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders line segments

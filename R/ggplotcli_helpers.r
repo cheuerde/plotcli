@@ -177,9 +177,9 @@ render_single_panel <- function(built, width, height, canvas_type, style_opts) {
     # Get layer parameters
     params <- layer$aes_params
     
-    # Call handler
+    # Call handler (pass style_opts for geoms that need it, like boxplot)
     tryCatch({
-      handler(layer_data, canvas, scales, params)
+      handler(layer_data, canvas, scales, params, style_opts)
     }, error = function(e) {
       warning(sprintf("Error rendering %s: %s", geom_class, e$message))
     })
@@ -704,9 +704,9 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
       
       if (is.null(handler)) next
       
-      # Render
+      # Render (pass style_opts for geoms that need it, like boxplot)
       tryCatch({
-        handler(panel_data, canvas, scales, layer$aes_params)
+        handler(panel_data, canvas, scales, layer$aes_params, style_opts)
       }, error = function(e) {
         warning(sprintf("Error rendering %s in panel %d: %s", 
                         geom_class, panel_idx, e$message))

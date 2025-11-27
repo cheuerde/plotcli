@@ -4,7 +4,7 @@
 \alias{geom_bar_handler}
 \title{GeomBar/GeomCol Handler}
 \usage{
-geom_bar_handler(data, canvas, scales, params)
+geom_bar_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders bar charts

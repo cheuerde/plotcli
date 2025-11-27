@@ -4,7 +4,7 @@
 \alias{geom_histogram_handler}
 \title{GeomHistogram Handler}
 \usage{
-geom_histogram_handler(data, canvas, scales, params)
+geom_histogram_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders histograms (same as bar)

@@ -4,7 +4,7 @@
 \alias{geom_hline_handler}
 \title{GeomHline Handler}
 \usage{
-geom_hline_handler(data, canvas, scales, params)
+geom_hline_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders horizontal lines

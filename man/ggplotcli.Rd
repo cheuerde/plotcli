@@ -17,7 +17,8 @@ ggplotcli(
   title_align = "center",
   subtitle = TRUE,
   caption = TRUE,
-  title = NULL
+  title = NULL,
+  boxplot_style = "ascii"
 )
 }
 \arguments{
@@ -46,13 +47,16 @@ ggplotcli(
 \item{caption}{Whether to show caption (default: TRUE)}
 
 \item{title}{Optional title override (NULL uses ggplot title)}
+
+\item{boxplot_style}{Style for boxplots: "ascii" uses box-drawing characters (default), 
+"braille" uses Braille dots like other geoms}
 }
 \value{
 Invisibly returns the canvas object
 }
 \description{
 Convert any ggplot2 plot to a terminal-based visualization using Unicode 
-Braille characters or ASCII. Supports 14+ geom types, faceting, themes,
+Braille characters or ASCII. Supports 15+ geom types, faceting, themes,
 and color aesthetics.
 }
 \examples{

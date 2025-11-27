@@ -4,7 +4,7 @@
 \alias{geom_area_handler}
 \title{GeomArea Handler}
 \usage{
-geom_area_handler(data, canvas, scales, params)
+geom_area_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders filled areas

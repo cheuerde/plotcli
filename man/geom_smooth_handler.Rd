@@ -4,7 +4,7 @@
 \alias{geom_smooth_handler}
 \title{GeomSmooth Handler}
 \usage{
-geom_smooth_handler(data, canvas, scales, params)
+geom_smooth_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders smoothed lines (just draws the line, ignores confidence interval)

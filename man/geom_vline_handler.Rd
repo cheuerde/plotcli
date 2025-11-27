@@ -4,7 +4,7 @@
 \alias{geom_vline_handler}
 \title{GeomVline Handler}
 \usage{
-geom_vline_handler(data, canvas, scales, params)
+geom_vline_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders vertical lines

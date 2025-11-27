@@ -125,7 +125,7 @@ create_scales <- function(built, plot_width, plot_height) {
 #'
 #' Renders points as individual pixels or small shapes
 #' @keywords internal
-geom_point_handler <- function(data, canvas, scales, params) {
+geom_point_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Get color mapping
   colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
   
@@ -150,7 +150,7 @@ geom_point_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders connected lines
 #' @keywords internal
-geom_line_handler <- function(data, canvas, scales, params) {
+geom_line_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Sort by x to ensure proper line connections
   data <- data[order(data$x), ]
   
@@ -186,7 +186,7 @@ geom_line_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders connected paths (order by data, not x)
 #' @keywords internal
-geom_path_handler <- function(data, canvas, scales, params) {
+geom_path_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Group by colour/group if present
   if ("group" %in% names(data)) {
     groups <- unique(data$group)
@@ -219,7 +219,7 @@ geom_path_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders bar charts
 #' @keywords internal
-geom_bar_handler <- function(data, canvas, scales, params) {
+geom_bar_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Get colors
   colors <- if ("fill" %in% names(data)) data$fill else rep("white", nrow(data))
   
@@ -247,7 +247,7 @@ geom_bar_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders filled areas
 #' @keywords internal
-geom_area_handler <- function(data, canvas, scales, params) {
+geom_area_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Sort by x
   data <- data[order(data$x), ]
   
@@ -270,7 +270,7 @@ geom_area_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders line segments
 #' @keywords internal
-geom_segment_handler <- function(data, canvas, scales, params) {
+geom_segment_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
   
   for (i in seq_len(nrow(data))) {
@@ -294,7 +294,7 @@ geom_segment_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders horizontal lines
 #' @keywords internal
-geom_hline_handler <- function(data, canvas, scales, params) {
+geom_hline_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
   
   for (i in seq_len(nrow(data))) {
@@ -315,7 +315,7 @@ geom_hline_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders vertical lines
 #' @keywords internal
-geom_vline_handler <- function(data, canvas, scales, params) {
+geom_vline_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
   
   for (i in seq_len(nrow(data))) {
@@ -336,7 +336,7 @@ geom_vline_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders rectangles
 #' @keywords internal
-geom_rect_handler <- function(data, canvas, scales, params) {
+geom_rect_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   colors <- if ("fill" %in% names(data)) data$fill else rep("white", nrow(data))
   
   for (i in seq_len(nrow(data))) {
@@ -361,7 +361,7 @@ geom_rect_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders smoothed lines (just draws the line, ignores confidence interval)
 #' @keywords internal
-geom_smooth_handler <- function(data, canvas, scales, params) {
+geom_smooth_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Sort by x
   data <- data[order(data$x), ]
   
@@ -384,7 +384,7 @@ geom_smooth_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders density curves
 #' @keywords internal
-geom_density_handler <- function(data, canvas, scales, params) {
+geom_density_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   # Group by group if present
   if ("group" %in% names(data)) {
     groups <- unique(data$group)
@@ -424,9 +424,17 @@ geom_histogram_handler <- geom_bar_handler
 
 #' GeomBoxplot Handler
 #'
-#' Renders boxplots with whiskers, box, median line, and outliers
+#' Renders boxplots with whiskers, box, median line, and outliers.
+#' Supports two styles: "ascii" (box-drawing characters) and "braille" (Braille dots).
 #' @keywords internal
-geom_boxplot_handler <- function(data, canvas, scales, params) {
+geom_boxplot_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  # Get boxplot style (default to "ascii" for classic look)
+  boxplot_style <- if (!is.null(style_opts) && !is.null(style_opts$boxplot_style)) {
+    style_opts$boxplot_style
+  } else {
+    "ascii"
+  }
+  
   # Get colors
   fill_colors <- if ("fill" %in% names(data)) data$fill else rep("white", nrow(data))
   outline_colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
@@ -468,29 +476,156 @@ geom_boxplot_handler <- function(data, canvas, scales, params) {
     supper <- scales$y(upper)
     symax <- scales$y(ymax)
     
-    # Draw whiskers (vertical lines from box to whisker ends)
-    # Lower whisker
-    canvas$draw_segment(round(sx), round(slower), round(sx), round(symin), color = fill_color)
-    # Upper whisker  
-    canvas$draw_segment(round(sx), round(supper), round(sx), round(symax), color = fill_color)
-    
-    # Draw whisker caps (horizontal lines at whisker ends)
-    cap_width <- (sxmax - sxmin) / 2
-    canvas$draw_segment(round(sx - cap_width/2), round(symin), round(sx + cap_width/2), round(symin), color = fill_color)
-    canvas$draw_segment(round(sx - cap_width/2), round(symax), round(sx + cap_width/2), round(symax), color = fill_color)
-    
-    # Draw box (rectangle from Q1 to Q3)
-    canvas$draw_rect(round(sxmin), round(supper), round(sxmax), round(slower), color = fill_color)
-    
-    # Draw median line
-    canvas$draw_segment(round(sxmin), round(smiddle), round(sxmax), round(smiddle), color = fill_color)
-    
-    # Draw outliers
-    if (length(outliers) > 0 && !all(is.na(outliers))) {
-      for (out in outliers) {
-        if (!is.na(out)) {
-          sy_out <- scales$y(out)
-          canvas$set_pixel(round(sx), round(sy_out), fill_color)
+    if (boxplot_style == "ascii") {
+      # ASCII style: use box-drawing characters directly on the character grid
+      # Convert pixel coordinates to character coordinates
+      char_x <- round(sx / canvas$x_mult)
+      char_xmin <- round(sxmin / canvas$x_mult)
+      char_xmax <- round(sxmax / canvas$x_mult)
+      char_ymin <- round(symin / canvas$y_mult)
+      char_lower <- round(slower / canvas$y_mult)
+      char_middle <- round(smiddle / canvas$y_mult)
+      char_upper <- round(supper / canvas$y_mult)
+      char_ymax <- round(symax / canvas$y_mult)
+      
+      # Box-drawing characters
+      horiz <- "\u2500"  # horizontal line
+      vert <- "\u2502"   # vertical line
+      top_left <- "\u250c"     # top left corner
+      top_right <- "\u2510"    # top right corner
+      bottom_left <- "\u2514"  # bottom left corner
+      bottom_right <- "\u2518" # bottom right corner
+      
+      # Get canvas matrix dimensions
+      n_rows <- nrow(canvas$matrix)
+      n_cols <- ncol(canvas$matrix)
+      
+      # Clamp values to valid range
+      char_x <- max(1, min(n_cols, char_x))
+      char_xmin <- max(1, min(n_cols, char_xmin))
+      char_xmax <- max(1, min(n_cols, char_xmax))
+      char_ymin <- max(1, min(n_rows, char_ymin))
+      char_lower <- max(1, min(n_rows, char_lower))
+      char_middle <- max(1, min(n_rows, char_middle))
+      char_upper <- max(1, min(n_rows, char_upper))
+      char_ymax <- max(1, min(n_rows, char_ymax))
+      
+      # Draw whiskers (vertical lines)
+      whisker_rows_lower <- seq(min(char_lower, char_ymin), max(char_lower, char_ymin))
+      for (row in whisker_rows_lower) {
+        if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
+          canvas$matrix[row, char_x] <- make_colored(vert, fill_color)
+        }
+      }
+      whisker_rows_upper <- seq(min(char_upper, char_ymax), max(char_upper, char_ymax))
+      for (row in whisker_rows_upper) {
+        if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
+          canvas$matrix[row, char_x] <- make_colored(vert, fill_color)
+        }
+      }
+      
+      # Draw box (Q1 to Q3) - calculate box dimensions first
+      box_left <- max(1, char_xmin)
+      box_right <- min(n_cols, char_xmax)
+      box_top <- min(char_lower, char_upper)
+      box_bottom <- max(char_lower, char_upper)
+      
+      # Draw whisker caps (horizontal lines) - same width as box
+      for (col in box_left:box_right) {
+        if (char_ymin >= 1 && char_ymin <= n_rows) {
+          canvas$matrix[char_ymin, col] <- make_colored(horiz, fill_color)
+        }
+        if (char_ymax >= 1 && char_ymax <= n_rows) {
+          canvas$matrix[char_ymax, col] <- make_colored(horiz, fill_color)
+        }
+      }
+      
+      # Top and bottom of box
+      for (col in box_left:box_right) {
+        if (box_top >= 1 && box_top <= n_rows) {
+          canvas$matrix[box_top, col] <- make_colored(horiz, fill_color)
+        }
+        if (box_bottom >= 1 && box_bottom <= n_rows) {
+          canvas$matrix[box_bottom, col] <- make_colored(horiz, fill_color)
+        }
+      }
+      
+      # Sides of box
+      for (row in box_top:box_bottom) {
+        if (row >= 1 && row <= n_rows) {
+          if (box_left >= 1 && box_left <= n_cols) {
+            canvas$matrix[row, box_left] <- make_colored(vert, fill_color)
+          }
+          if (box_right >= 1 && box_right <= n_cols) {
+            canvas$matrix[row, box_right] <- make_colored(vert, fill_color)
+          }
+        }
+      }
+      
+      # Corners
+      if (box_top >= 1 && box_top <= n_rows) {
+        if (box_left >= 1 && box_left <= n_cols) {
+          canvas$matrix[box_top, box_left] <- make_colored(top_left, fill_color)
+        }
+        if (box_right >= 1 && box_right <= n_cols) {
+          canvas$matrix[box_top, box_right] <- make_colored(top_right, fill_color)
+        }
+      }
+      if (box_bottom >= 1 && box_bottom <= n_rows) {
+        if (box_left >= 1 && box_left <= n_cols) {
+          canvas$matrix[box_bottom, box_left] <- make_colored(bottom_left, fill_color)
+        }
+        if (box_right >= 1 && box_right <= n_cols) {
+          canvas$matrix[box_bottom, box_right] <- make_colored(bottom_right, fill_color)
+        }
+      }
+      
+      # Median line - only inside the box (not including the border)
+      if (char_middle >= 1 && char_middle <= n_rows) {
+        for (col in (box_left + 1):(box_right - 1)) {
+          if (col >= 1 && col <= n_cols) {
+            canvas$matrix[char_middle, col] <- make_colored(horiz, fill_color)
+          }
+        }
+      }
+      
+      # Outliers
+      if (length(outliers) > 0 && !all(is.na(outliers))) {
+        for (out in outliers) {
+          if (!is.na(out)) {
+            char_y_out <- round(scales$y(out) / canvas$y_mult)
+            if (char_y_out >= 1 && char_y_out <= n_rows &&
+                char_x >= 1 && char_x <= n_cols) {
+              canvas$matrix[char_y_out, char_x] <- make_colored("*", fill_color)
+            }
+          }
+        }
+      }
+      
+    } else {
+      # Braille style: use canvas drawing methods (high resolution)
+      # Draw whiskers (vertical lines from box to whisker ends)
+      canvas$draw_segment(round(sx), round(slower), round(sx), round(symin), color = fill_color)
+      canvas$draw_segment(round(sx), round(supper), round(sx), round(symax), color = fill_color)
+      
+      # Draw whisker caps (horizontal lines at whisker ends)
+      cap_width <- (sxmax - sxmin) / 2
+      canvas$draw_segment(round(sx - cap_width/2), round(symin), round(sx + cap_width/2), round(symin), color = fill_color)
+      canvas$draw_segment(round(sx - cap_width/2), round(symax), round(sx + cap_width/2), round(symax), color = fill_color)
+      
+      # Draw box (rectangle from Q1 to Q3)
+      canvas$draw_rect(round(sxmin), round(supper), round(sxmax), round(slower), color = fill_color)
+      
+      # Draw median line
+      canvas$draw_segment(round(sxmin), round(smiddle), round(sxmax), round(smiddle), color = fill_color)
+      
+      # Draw outliers
+      if (length(outliers) > 0 && !all(is.na(outliers))) {
+        for (out in outliers) {
+          if (!is.na(out)) {
+            sy_out <- scales$y(out)
+            canvas$set_pixel(round(sx), round(sy_out), fill_color)
+          }
         }
       }
     }
@@ -502,7 +637,7 @@ geom_boxplot_handler <- function(data, canvas, scales, params) {
 #'
 #' Renders text labels
 #' @keywords internal
-geom_text_handler <- function(data, canvas, scales, params) {
+geom_text_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
   
   for (i in seq_len(nrow(data))) {

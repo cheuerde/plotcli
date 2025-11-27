@@ -4,7 +4,7 @@
 \alias{geom_rect_handler}
 \title{GeomRect Handler}
 \usage{
-geom_rect_handler(data, canvas, scales, params)
+geom_rect_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders rectangles

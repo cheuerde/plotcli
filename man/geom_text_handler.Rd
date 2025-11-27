@@ -4,7 +4,7 @@
 \alias{geom_text_handler}
 \title{GeomText Handler}
 \usage{
-geom_text_handler(data, canvas, scales, params)
+geom_text_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders text labels

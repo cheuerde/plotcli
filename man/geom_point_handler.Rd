@@ -4,7 +4,7 @@
 \alias{geom_point_handler}
 \title{GeomPoint Handler}
 \usage{
-geom_point_handler(data, canvas, scales, params)
+geom_point_handler(data, canvas, scales, params, style_opts = NULL)
 }
 \description{
 Renders points as individual pixels or small shapes
