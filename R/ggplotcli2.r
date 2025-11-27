@@ -8,9 +8,15 @@
 #' @param width Character width of the plot (default: 60)
 #' @param height Character height of the plot (default: 20)
 #' @param canvas_type Type of canvas: "braille", "block", or "ascii" (default: "braille")
-#' @param show_axes Whether to show axes (default: TRUE)
-#' @param show_legend Whether to show legend (default: TRUE)
-#' @param title Optional title override
+#' @param border Draw border around plot area. "auto" uses ggplot theme, or TRUE/FALSE (default: "auto")
+#' @param grid Grid lines: "none", "major", "minor", "both", or "auto" (default: "none")
+#' @param show_axes Whether to show axis values (default: TRUE)
+#' @param axis_labels Whether to show axis labels from ggplot (default: TRUE)
+#' @param legend Legend display: "auto", "right", "bottom", "none" (default: "auto")
+#' @param title_align Title alignment: "center" or "left" (default: "center")
+#' @param subtitle Whether to show subtitle (default: TRUE)
+#' @param caption Whether to show caption (default: TRUE)
+#' @param title Optional title override (NULL uses ggplot title)
 #'
 #' @return Invisibly returns the canvas object
 #' @export
@@ -19,22 +25,40 @@
 #' library(ggplot2)
 #' p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
 #' ggplotcli2(p)
+#' ggplotcli2(p, border = TRUE, grid = "major")
 ggplotcli2 <- function(p,
                        width = 60,
                        height = 20,
                        canvas_type = "braille",
+                       border = "auto",
+                       grid = "none",
                        show_axes = TRUE,
-                       show_legend = TRUE,
+                       axis_labels = TRUE,
+                       legend = "auto",
+                       title_align = "center",
+                       subtitle = TRUE,
+                       caption = TRUE,
                        title = NULL) {
   
   # Build the plot to get computed data
   built <- ggplot2::ggplot_build(p)
   
-  # Get plot title
-  plot_title <- title
-  if (is.null(plot_title) && !is.null(built$plot$labels$title)) {
-    plot_title <- built$plot$labels$title
-  }
+  # Extract styling from ggplot theme
+  style <- extract_plot_style(built, border, grid, legend)
+  
+  # Get plot labels
+  labels <- extract_plot_labels(built, title, subtitle, caption, axis_labels)
+  
+  # Create style options object
+  style_opts <- list(
+    border = style$border,
+    grid = style$grid,
+    show_axes = show_axes,
+    axis_labels = axis_labels,
+    legend = style$legend,
+    title_align = title_align,
+    labels = labels
+  )
   
   # Check for faceting
   layout <- built$layout
@@ -43,31 +67,126 @@ ggplotcli2 <- function(p,
   if (facet_info$has_facets) {
     # Render faceted plot
     render_faceted_plot(built, facet_info, width, height, canvas_type, 
-                        show_axes, plot_title)
+                        style_opts)
   } else {
     # Render single panel plot
-    render_single_panel(built, width, height, canvas_type, show_axes, plot_title)
+    render_single_panel(built, width, height, canvas_type, style_opts)
   }
+}
+
+
+#' Extract Plot Style from ggplot Theme
+#' @keywords internal
+extract_plot_style <- function(built, border, grid, legend) {
+  theme <- built$plot$theme
+  
+  # Determine border style
+  if (border == "auto") {
+    # Check if theme has panel.border
+    has_border <- !is.null(theme$panel.border) && 
+                  !inherits(theme$panel.border, "element_blank")
+    # Or axis lines (like theme_classic)
+    has_axis_line <- !is.null(theme$axis.line) && 
+                     !inherits(theme$axis.line, "element_blank")
+    border <- has_border || has_axis_line
+  }
+  
+  # Determine grid style
+  if (grid == "auto") {
+    has_major <- !is.null(theme$panel.grid.major) && 
+                 !inherits(theme$panel.grid.major, "element_blank")
+    has_minor <- !is.null(theme$panel.grid.minor) && 
+                 !inherits(theme$panel.grid.minor, "element_blank")
+    
+    if (has_major && has_minor) {
+      grid <- "both"
+    } else if (has_major) {
+      grid <- "major"
+    } else if (has_minor) {
+      grid <- "minor"
+    } else {
+      grid <- "none"
+    }
+  }
+  
+  # Determine legend position
+  if (legend == "auto") {
+    if (!is.null(theme$legend.position)) {
+      pos <- theme$legend.position
+      if (is.character(pos)) {
+        legend <- pos
+      } else {
+        legend <- "right"  # Default for numeric positions
+      }
+    } else {
+      legend <- "right"
+    }
+  }
+  
+  list(
+    border = border,
+    grid = grid,
+    legend = legend
+  )
+}
+
+
+#' Extract Plot Labels from ggplot
+#' @keywords internal
+extract_plot_labels <- function(built, title, subtitle, caption, axis_labels) {
+  labels <- built$plot$labels
+  
+  list(
+    title = if (!is.null(title)) title else labels$title,
+    subtitle = if (subtitle) labels$subtitle else NULL,
+    caption = if (caption) labels$caption else NULL,
+    x = if (axis_labels) labels$x else NULL,
+    y = if (axis_labels) labels$y else NULL,
+    colour = labels$colour,
+    fill = labels$fill
+  )
 }
 
 
 #' Render a single panel (non-faceted) plot
 #' @keywords internal
-render_single_panel <- function(built, width, height, canvas_type, show_axes, plot_title) {
-  # Calculate margins for axes
-  left_margin <- if (show_axes) 6 else 0
+render_single_panel <- function(built, width, height, canvas_type, style_opts) {
+  labels <- style_opts$labels
+  show_axes <- style_opts$show_axes
+  
+  # Calculate margins
+  left_margin <- if (show_axes) 7 else 0
+  right_margin <- 1
   bottom_margin <- if (show_axes) 2 else 0
-  top_margin <- if (!is.null(plot_title)) 1 else 0
+  if (!is.null(labels$x)) bottom_margin <- bottom_margin + 1
+  
+  # Top margin for title/subtitle
+  top_margin <- 0
+  if (!is.null(labels$title)) top_margin <- top_margin + 1
+  if (!is.null(labels$subtitle)) top_margin <- top_margin + 1
+  
+  # Bottom for caption
+  caption_margin <- if (!is.null(labels$caption)) 1 else 0
   
   # Calculate plot area dimensions
-  plot_width <- width - left_margin
-  plot_height <- height - bottom_margin - top_margin
+  plot_width <- width - left_margin - right_margin
+  plot_height <- height - bottom_margin - top_margin - caption_margin
+  
+  if (plot_width < 5 || plot_height < 3) {
+    warning("Plot area too small")
+    return(invisible(NULL))
+  }
   
   # Create canvas for plot area
   canvas <- create_canvas(plot_width, plot_height, canvas_type)
   
   # Create scales
   scales <- create_scales(built, canvas$pixel_width, canvas$pixel_height)
+  
+  # Draw grid lines first (behind data)
+  if (style_opts$grid != "none") {
+    draw_grid(canvas, scales, style_opts$grid)
+  }
   
   # Process each layer
   for (i in seq_along(built$data)) {
@@ -96,14 +215,20 @@ render_single_panel <- function(built, width, height, canvas_type, show_axes, pl
     })
   }
   
+  # Draw border if requested
+  if (style_opts$border) {
+    draw_border(canvas)
+  }
+  
   # Build the final output matrix
-  output <- build_plot_output(
+  output <- build_plot_output_v2(
     canvas = canvas,
     scales = scales,
     width = width,
     height = height,
-    show_axes = show_axes,
-    title = plot_title
+    style_opts = style_opts,
+    left_margin = left_margin,
+    top_margin = top_margin
   )
   
   # Print
@@ -116,7 +241,232 @@ render_single_panel <- function(built, width, height, canvas_type, show_axes, pl
 }
 
 
-#' Build Plot Output with Axes and Title
+#' Draw Grid Lines on Canvas
+#' @keywords internal
+draw_grid <- function(canvas, scales, grid_type) {
+  # Use a subtle character for grid
+  grid_color <- "silver"
+  
+  # Major grid at tick positions
+  if (grid_type %in% c("major", "both")) {
+    # Vertical lines at x ticks
+    x_ticks <- pretty(scales$x_range, n = 5)
+    x_ticks <- x_ticks[x_ticks > scales$x_range[1] & x_ticks < scales$x_range[2]]
+    
+    for (tick in x_ticks) {
+      x <- scales$x(tick)
+      canvas$draw_vline(round(x), color = grid_color)
+    }
+    
+    # Horizontal lines at y ticks
+    y_ticks <- pretty(scales$y_range, n = 5)
+    y_ticks <- y_ticks[y_ticks > scales$y_range[1] & y_ticks < scales$y_range[2]]
+    
+    for (tick in y_ticks) {
+      y <- scales$y(tick)
+      canvas$draw_hline(round(y), color = grid_color)
+    }
+  }
+  
+  # Minor grid (more lines)
+  if (grid_type %in% c("minor", "both")) {
+    x_ticks <- pretty(scales$x_range, n = 10)
+    x_ticks <- x_ticks[x_ticks > scales$x_range[1] & x_ticks < scales$x_range[2]]
+    
+    for (tick in x_ticks) {
+      x <- scales$x(tick)
+      # Only draw if not already a major grid line
+      if (grid_type == "minor" || !(tick %in% pretty(scales$x_range, n = 5))) {
+        canvas$draw_vline(round(x), color = grid_color)
+      }
+    }
+    
+    y_ticks <- pretty(scales$y_range, n = 10)
+    y_ticks <- y_ticks[y_ticks > scales$y_range[1] & y_ticks < scales$y_range[2]]
+    
+    for (tick in y_ticks) {
+      y <- scales$y(tick)
+      if (grid_type == "minor" || !(tick %in% pretty(scales$y_range, n = 5))) {
+        canvas$draw_hline(round(y), color = grid_color)
+      }
+    }
+  }
+}
+
+
+#' Draw Border Around Canvas
+#' @keywords internal
+draw_border <- function(canvas) {
+  # Draw rectangle around the entire canvas
+  canvas$draw_rect(1, 1, canvas$pixel_width, canvas$pixel_height, color = NULL)
+}
+
+
+#' Build Plot Output with Axes and Title (v2)
+#'
+#' @param canvas The rendered canvas
+#' @param scales The scales object
+#' @param width Total width
+#' @param height Total height
+#' @param style_opts Style options
+#' @param left_margin Left margin size
+#' @param top_margin Top margin size
+#' @return Character matrix
+#' @keywords internal
+build_plot_output_v2 <- function(canvas, scales, width, height, style_opts, 
+                                  left_margin, top_margin) {
+  # Get rendered canvas
+  rendered <- canvas$render()
+  labels <- style_opts$labels
+  show_axes <- style_opts$show_axes
+  title_align <- style_opts$title_align
+  
+  # Create output matrix
+  output <- matrix(" ", nrow = height, ncol = width)
+  
+  current_row <- 1
+  
+  # Add title if present
+  if (!is.null(labels$title)) {
+    title_text <- substr(labels$title, 1, width - 2)
+    title_chars <- strsplit(title_text, "")[[1]]
+    
+    if (title_align == "center") {
+      start_col <- max(1, floor((width - length(title_chars)) / 2))
+    } else {
+      start_col <- left_margin + 1
+    }
+    
+    for (i in seq_along(title_chars)) {
+      if (start_col + i - 1 <= width) {
+        output[current_row, start_col + i - 1] <- title_chars[i]
+      }
+    }
+    current_row <- current_row + 1
+  }
+  
+  # Add subtitle if present
+  if (!is.null(labels$subtitle)) {
+    sub_text <- substr(labels$subtitle, 1, width - 2)
+    sub_chars <- strsplit(sub_text, "")[[1]]
+    
+    if (title_align == "center") {
+      start_col <- max(1, floor((width - length(sub_chars)) / 2))
+    } else {
+      start_col <- left_margin + 1
+    }
+    
+    for (i in seq_along(sub_chars)) {
+      if (start_col + i - 1 <= width) {
+        output[current_row, start_col + i - 1] <- sub_chars[i]
+      }
+    }
+    current_row <- current_row + 1
+  }
+  
+  # Copy canvas to output (offset by margins)
+  for (i in seq_len(nrow(rendered))) {
+    for (j in seq_len(ncol(rendered))) {
+      out_row <- i + top_margin
+      out_col <- j + left_margin
+      if (out_row <= height && out_col <= width) {
+        output[out_row, out_col] <- rendered[i, j]
+      }
+    }
+  }
+  
+  # Draw Y axis values
+  if (show_axes) {
+    y_ticks <- pretty(scales$y_range, n = 5)
+    y_ticks <- y_ticks[y_ticks >= scales$y_range[1] & y_ticks <= scales$y_range[2]]
+    
+    for (tick in y_ticks) {
+      y_frac <- (tick - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
+      row <- round(nrow(rendered) - y_frac * (nrow(rendered) - 1)) + top_margin
+      
+      if (row >= 1 && row <= height) {
+        label <- format_axis_label(tick)
+        label_chars <- strsplit(label, "")[[1]]
+        
+        start_col <- max(1, left_margin - length(label_chars))
+        for (i in seq_along(label_chars)) {
+          if (start_col + i - 1 < left_margin) {
+            output[row, start_col + i - 1] <- label_chars[i]
+          }
+        }
+      }
+    }
+    
+    # Draw X axis values
+    x_row <- top_margin + nrow(rendered) + 1
+    x_ticks <- pretty(scales$x_range, n = 5)
+    x_ticks <- x_ticks[x_ticks >= scales$x_range[1] & x_ticks <= scales$x_range[2]]
+    
+    for (tick in x_ticks) {
+      x_frac <- (tick - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
+      col <- round(x_frac * (ncol(rendered) - 1)) + left_margin + 1
+      
+      if (col >= left_margin && col <= width && x_row <= height) {
+        label <- format_axis_label(tick)
+        label_chars <- strsplit(label, "")[[1]]
+        
+        start_col <- col - floor(length(label_chars) / 2)
+        for (i in seq_along(label_chars)) {
+          if (start_col + i - 1 >= 1 && start_col + i - 1 <= width) {
+            output[x_row, start_col + i - 1] <- label_chars[i]
+          }
+        }
+      }
+    }
+  }
+  
+  # Add Y axis label (rotated - shown vertically on left)
+  if (!is.null(labels$y) && left_margin >= 3) {
+    y_label <- labels$y
+    # For terminal, just show abbreviated label at top-left
+    y_chars <- strsplit(substr(y_label, 1, min(nchar(y_label), nrow(rendered))), "")[[1]]
+    label_start <- top_margin + floor((nrow(rendered) - length(y_chars)) / 2)
+    for (i in seq_along(y_chars)) {
+      row <- label_start + i
+      if (row >= 1 && row <= height) {
+        output[row, 1] <- y_chars[i]
+      }
+    }
+  }
+  
+  # Add X axis label (centered below x values)
+  if (!is.null(labels$x)) {
+    x_row <- top_margin + nrow(rendered) + 2
+    if (x_row <= height) {
+      x_label <- substr(labels$x, 1, ncol(rendered))
+      x_chars <- strsplit(x_label, "")[[1]]
+      start_col <- left_margin + floor((ncol(rendered) - length(x_chars)) / 2)
+      for (i in seq_along(x_chars)) {
+        if (start_col + i - 1 >= 1 && start_col + i - 1 <= width) {
+          output[x_row, start_col + i - 1] <- x_chars[i]
+        }
+      }
+    }
+  }
+  
+  # Add caption (bottom right)
+  if (!is.null(labels$caption)) {
+    cap_row <- height
+    cap_text <- substr(labels$caption, 1, width - 2)
+    cap_chars <- strsplit(cap_text, "")[[1]]
+    start_col <- width - length(cap_chars)
+    for (i in seq_along(cap_chars)) {
+      if (start_col + i - 1 >= 1) {
+        output[cap_row, start_col + i - 1] <- cap_chars[i]
+      }
+    }
+  }
+  
+  return(output)
+}
+
+
+#' Build Plot Output with Axes and Title (legacy)
 #'
 #' @param canvas The rendered canvas
 #' @param scales The scales object
@@ -127,86 +477,17 @@ render_single_panel <- function(built, width, height, canvas_type, show_axes, pl
 #' @return Character matrix
 #' @keywords internal
 build_plot_output <- function(canvas, scales, width, height, show_axes, title) {
-  # Get rendered canvas
-  rendered <- canvas$render()
+  # Legacy wrapper - convert to new style
+  style_opts <- list(
+    show_axes = show_axes,
+    title_align = "center",
+    labels = list(title = title, subtitle = NULL, caption = NULL, x = NULL, y = NULL)
+  )
   
-  if (!show_axes) {
-    return(rendered)
-  }
-  
-  # Calculate margins
-  left_margin <- 6
+  left_margin <- if (show_axes) 6 else 0
   top_margin <- if (!is.null(title)) 1 else 0
   
-  # Create output matrix
-  output <- matrix(" ", nrow = height, ncol = width)
-  
-  # Add title if present
-  if (!is.null(title)) {
-    title_chars <- strsplit(substr(title, 1, width), "")[[1]]
-    start_col <- max(1, floor((width - length(title_chars)) / 2))
-    for (i in seq_along(title_chars)) {
-      output[1, start_col + i - 1] <- title_chars[i]
-    }
-  }
-  
-  # Copy canvas to output (offset by margins)
-  for (i in seq_len(nrow(rendered))) {
-    for (j in seq_len(ncol(rendered))) {
-      output[i + top_margin, j + left_margin] <- rendered[i, j]
-    }
-  }
-  
-  # Draw Y axis
-  y_ticks <- pretty(scales$y_range, n = 5)
-  y_ticks <- y_ticks[y_ticks >= scales$y_range[1] & y_ticks <= scales$y_range[2]]
-  
-  for (tick in y_ticks) {
-    # Calculate row position
-    y_frac <- (tick - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
-    row <- round(nrow(rendered) - y_frac * (nrow(rendered) - 1)) + top_margin
-    
-    if (row >= 1 && row <= height) {
-      # Format tick label
-      label <- format_axis_label(tick)
-      label_chars <- strsplit(label, "")[[1]]
-      
-      # Right-align in left margin
-      start_col <- max(1, left_margin - length(label_chars))
-      for (i in seq_along(label_chars)) {
-        if (start_col + i - 1 <= left_margin) {
-          output[row, start_col + i - 1] <- label_chars[i]
-        }
-      }
-    }
-  }
-  
-  # Draw X axis
-  x_row <- height
-  x_ticks <- pretty(scales$x_range, n = 5)
-  x_ticks <- x_ticks[x_ticks >= scales$x_range[1] & x_ticks <= scales$x_range[2]]
-  
-  for (tick in x_ticks) {
-    # Calculate column position
-    x_frac <- (tick - scales$x_range[1]) / (scales$x_range[2] - scales$x_range[1])
-    col <- round(x_frac * (ncol(rendered) - 1)) + left_margin + 1
-    
-    if (col >= left_margin && col <= width) {
-      # Format tick label
-      label <- format_axis_label(tick)
-      label_chars <- strsplit(label, "")[[1]]
-      
-      # Center label under tick position
-      start_col <- col - floor(length(label_chars) / 2)
-      for (i in seq_along(label_chars)) {
-        if (start_col + i - 1 >= 1 && start_col + i - 1 <= width) {
-          output[x_row, start_col + i - 1] <- label_chars[i]
-        }
-      }
-    }
-  }
-  
-  return(output)
+  build_plot_output_v2(canvas, scales, width, height, style_opts, left_margin, top_margin)
 }
 
 
@@ -292,19 +573,20 @@ get_facet_info <- function(layout) {
 #' @param width Total width
 #' @param height Total height
 #' @param canvas_type Canvas type
-#' @param show_axes Whether to show axes
-#' @param plot_title Plot title
+#' @param style_opts Style options
 #' @keywords internal
 render_faceted_plot <- function(built, facet_info, width, height, canvas_type, 
-                                 show_axes, plot_title) {
+                                 style_opts) {
   n_rows <- facet_info$n_rows
   n_cols <- facet_info$n_cols
   panel_layout <- facet_info$layout
+  labels <- style_opts$labels
+  show_axes <- style_opts$show_axes
   
   # Calculate dimensions for each panel
   # Reserve space for: title, facet labels, axes
-  top_margin <- if (!is.null(plot_title)) 2 else 1
-  left_margin <- if (show_axes) 6 else 0
+  top_margin <- if (!is.null(labels$title)) 2 else 1
+  left_margin <- if (show_axes) 7 else 0
   
   # Calculate panel dimensions
   panel_width <- floor((width - left_margin) / n_cols)
@@ -314,9 +596,13 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
   output <- matrix(" ", nrow = height, ncol = width)
   
   # Add title if present
-  if (!is.null(plot_title)) {
-    title_chars <- strsplit(substr(plot_title, 1, width), "")[[1]]
-    start_col <- max(1, floor((width - length(title_chars)) / 2))
+  if (!is.null(labels$title)) {
+    title_chars <- strsplit(substr(labels$title, 1, width), "")[[1]]
+    if (style_opts$title_align == "center") {
+      start_col <- max(1, floor((width - length(title_chars)) / 2))
+    } else {
+      start_col <- left_margin + 1
+    }
     for (i in seq_along(title_chars)) {
       output[1, start_col + i - 1] <- title_chars[i]
     }
