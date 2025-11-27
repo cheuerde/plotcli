@@ -479,14 +479,17 @@ geom_boxplot_handler <- function(data, canvas, scales, params, style_opts = NULL
     if (boxplot_style == "ascii") {
       # ASCII style: use box-drawing characters directly on the character grid
       # Convert pixel coordinates to character coordinates
+      # Use the center x coordinate as the reference point
       char_x <- round(sx / canvas$x_mult)
-      char_xmin <- round(sxmin / canvas$x_mult)
-      char_xmax <- round(sxmax / canvas$x_mult)
       char_ymin <- round(symin / canvas$y_mult)
       char_lower <- round(slower / canvas$y_mult)
       char_middle <- round(smiddle / canvas$y_mult)
       char_upper <- round(supper / canvas$y_mult)
       char_ymax <- round(symax / canvas$y_mult)
+      
+      # Calculate box width in character units from the data
+      box_half_width <- round((sxmax - sxmin) / canvas$x_mult / 2)
+      if (box_half_width < 2) box_half_width <- 2  # Minimum width for visible box
       
       # Box-drawing characters
       horiz <- "\u2500"  # horizontal line
@@ -500,17 +503,21 @@ geom_boxplot_handler <- function(data, canvas, scales, params, style_opts = NULL
       n_rows <- nrow(canvas$matrix)
       n_cols <- ncol(canvas$matrix)
       
-      # Clamp values to valid range
+      # Clamp center to valid range
       char_x <- max(1, min(n_cols, char_x))
-      char_xmin <- max(1, min(n_cols, char_xmin))
-      char_xmax <- max(1, min(n_cols, char_xmax))
       char_ymin <- max(1, min(n_rows, char_ymin))
       char_lower <- max(1, min(n_rows, char_lower))
       char_middle <- max(1, min(n_rows, char_middle))
       char_upper <- max(1, min(n_rows, char_upper))
       char_ymax <- max(1, min(n_rows, char_ymax))
       
-      # Draw whiskers (vertical lines)
+      # Calculate box boundaries from center
+      box_left <- max(1, char_x - box_half_width)
+      box_right <- min(n_cols, char_x + box_half_width)
+      box_top <- min(char_lower, char_upper)
+      box_bottom <- max(char_lower, char_upper)
+      
+      # Draw whiskers (vertical lines) - use char_x (true center from data)
       whisker_rows_lower <- seq(min(char_lower, char_ymin), max(char_lower, char_ymin))
       for (row in whisker_rows_lower) {
         if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
@@ -524,19 +531,15 @@ geom_boxplot_handler <- function(data, canvas, scales, params, style_opts = NULL
         }
       }
       
-      # Draw box (Q1 to Q3) - calculate box dimensions first
-      box_left <- max(1, char_xmin)
-      box_right <- min(n_cols, char_xmax)
-      box_top <- min(char_lower, char_upper)
-      box_bottom <- max(char_lower, char_upper)
-      
-      # Draw whisker caps (horizontal lines) - same width as box
-      for (col in box_left:box_right) {
-        if (char_ymin >= 1 && char_ymin <= n_rows) {
-          canvas$matrix[char_ymin, col] <- make_colored(horiz, fill_color)
-        }
-        if (char_ymax >= 1 && char_ymax <= n_rows) {
-          canvas$matrix[char_ymax, col] <- make_colored(horiz, fill_color)
+      # Draw whisker caps (horizontal lines) - same width as median (inside box)
+      for (col in (box_left + 1):(box_right - 1)) {
+        if (col >= 1 && col <= n_cols) {
+          if (char_ymin >= 1 && char_ymin <= n_rows) {
+            canvas$matrix[char_ymin, col] <- make_colored(horiz, fill_color)
+          }
+          if (char_ymax >= 1 && char_ymax <= n_rows) {
+            canvas$matrix[char_ymax, col] <- make_colored(horiz, fill_color)
+          }
         }
       }
       
@@ -589,7 +592,7 @@ geom_boxplot_handler <- function(data, canvas, scales, params, style_opts = NULL
         }
       }
       
-      # Outliers
+      # Outliers - use char_x (true center from data)
       if (length(outliers) > 0 && !all(is.na(outliers))) {
         for (out in outliers) {
           if (!is.na(out)) {
