@@ -13,7 +13,7 @@ Simple canvas using basic ASCII characters.
 Resolution: 1x1 (one pixel per character)
 }
 \section{Super class}{
-\code{plotcli::Canvas} -> \code{AsciiCanvas}
+\code{\link[plotcli:Canvas]{plotcli::Canvas}} -> \code{AsciiCanvas}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

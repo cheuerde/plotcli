@@ -25,7 +25,7 @@ Row 3 │ 7  │ 8  │    │0x40│0x80│
   └────┴────┘      └────┴────┘
 }
 \section{Super class}{
-\code{plotcli::Canvas} -> \code{BrailleCanvas}
+\code{\link[plotcli:Canvas]{plotcli::Canvas}} -> \code{BrailleCanvas}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

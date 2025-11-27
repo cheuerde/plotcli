@@ -15,7 +15,7 @@ Uses half-block characters: ▀ (upper), ▄ (lower), █ (full)
 Resolution: 1x2 (1 horizontal, 2 vertical pixels per character)
 }
 \section{Super class}{
-\code{plotcli::Canvas} -> \code{BlockCanvas}
+\code{\link[plotcli:Canvas]{plotcli::Canvas}} -> \code{BlockCanvas}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

@@ -9,84 +9,134 @@
 ![Colored Density Plot on Terminal](docs/boxplot.jpg)
 
 plotcli is an R package that brings the power of command-line plotting to your R environment. 
-With a simple and intuitive R6 class interface, plotcli allows you to create and customize a 
-variety of plot types, such as scatter, line, bar, and box plots, directly in your console. 
+With a simple and intuitive interface, plotcli allows you to create and customize a 
+variety of plot types directly in your console using Unicode Braille characters and ANSI colors.
 
-Features
+## Features
 
-- Convert `ggplot2` objects to colored terminal plots with `ggplotcli`
-- Easy-to-use R6 class interface
-- Supports scatter, line, bar, and box plots
-- Customizable plot elements: title, axis labels, ticks, and legend
-- Braille character support for high-resolution plots
-- Convenience wrappers for most frequently used functions
+- **`ggplotcli2`**: Universal ggplot2 converter - render *any* ggplot in the terminal
+- **14 Supported Geoms**: points, lines, bars, histograms, density, smooth, area, segments, and more
+- **Faceting**: Full support for `facet_wrap()` and `facet_grid()`
+- **Theme Auto-Detection**: Automatically respects ggplot2 themes (borders, grids)
+- **Multiple Canvas Types**: Braille (high-res), Block, or ASCII
+- **Colored Output**: Full ANSI color support for aesthetics
+- **R6 Class Interface**: Direct plotting with `plotcli` class
 
 `plotcli` is heavily inspired by the excellent [UnicodePlots.jl](https://github.com/JuliaPlots/UnicodePlots.jl) library.
 
+## Quick Start
 
 ```r
-> ggplotcli(ggplot(iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + geom_boxplot())
+library(plotcli)
+library(ggplot2)
 
-                    ┌────────────────────────────────────────────────────────────┐       
-                4.4 │       ───────                                              │       
-                    │          │                                                 │       
-                    │          │                                                 │       
-                    │          │                                                 │       
-                    │          │                                   ───────       │       
-                3.8 │      ┌───────┐                                  │          │       
-                    │      │       │                                  │          │       
-                    │      │───────│           ───────                │          │       
-                    │      │       │              │                   │          │   setosa   
-Sepal.Length    3.2 │      └───────┘              │               ┌───────┐      │   versicolor   
-                    │          │                  │               │       │      │   virginica   
-                    │          │              ┌───────┐           │───────│      │       
-                    │       ───────           │───────│           └───────┘      │       
-                    │                         │       │               │          │       
-                2.6 │                         │       │               │          │       
-                    │                         └───────┘               │          │       
-                    │                             │                   │          │       
-                    │          *                  │                ───────       │       
-                    │                             │                              │       
-                2.0 │                          ───────                           │       
-                    └────────────────────────────────────────────────────────────┘       
-                                                                                         
-                            setosa           versicolor           virginica              
-                                                                                         
-                                             Sepal.Width                                 
+# Any ggplot2 plot works!
+p <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
+  geom_point() +
+  labs(title = "MPG vs Weight")
+
+# Render in terminal
+ggplotcli2(p)
 ```
 
+Output:
+```
+                    MPG vs Weight                     
+  35.0 ⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤  
+       ⠒⠒⣗⢒⠒⠒⠒⠒⡗⠒⠚⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒  
+  30.0 ⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉  
+m      ⠤⠤⡧⠤⠤⠤⠤⠬⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤  
+p 25.0 ⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⡒⠒⡗⠒⠒⠒⠒⠒⡗⠒⡚⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒  
+g 20.0 ⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣙⣉⣙⣙⣉⣏⣉⣙⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉  
+       ⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠼⡧⠤⠤⡤⠬⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤  
+  15.0 ⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠒⡗⠒⠒⠒⠒⠲⡷⡖⠒⠲⠒⠒⡗⠓⠒⠒⠒⠒⡗⠒⠒  
+       ⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉⣉⣋⣉⣏⣉⣉⣉⣉⣉⣏⣉⣉  
+  10.0 ⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠤⠤⠤⡧⠤⠤⠦⠤⠦⡧⠤⠤  
+            2.0         3.0         4.0         5.0        
+                             wt                            
+```
+
+## Faceting Example
+
+```r
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point(color = "blue") +
+  facet_wrap(~cyl) +
+  labs(title = "MPG by Cylinders") +
+  theme_bw()  # Automatically adds borders!
+
+ggplotcli2(p, width = 70, height = 16)
+```
+
+Output:
+```
+                       MPG by Cylinders                        
+               4                    6                    8     
+      ⡏⠉⠩⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢹ ⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢹ ⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⢹
+      ⡇   ⠁              ⢸ ⡇                  ⢸ ⡇                  ⢸
+  30.0⡇⠉                 ⢸ ⡇                  ⢸ ⡇                  ⢸
+      ⡇  ⢂               ⢸ ⡇                  ⢸ ⡇                  ⢸
+      ⡇   ⠈⡀⢀ ⠈          ⢸ ⡇     ⡀⡀⢀          ⢸ ⡇                  ⢸
+  20.0⡇                  ⢸ ⡇     ⠠  ⠠         ⢸ ⡇        ⢀ ⠠       ⢸
+      ⡇                  ⢸ ⡇        ⠘         ⢸ ⡇          ⠄⢀      ⢸
+      ⡇                  ⢸ ⡇                  ⢸ ⡇       ⠈⠐⡂⠂      ⠠⢸
+  10.0⣇⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣸ ⣇⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣸ ⣇⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣒⣸
+        2.0      4.0         2.0      4.0         2.0      4.0     
+```
+
+## Styling Options
+
+```r
+# With border and grid
+ggplotcli2(p, border = TRUE, grid = "major")
+
+# Different canvas types
+ggplotcli2(p, canvas_type = "braille")  # High resolution (default)
+ggplotcli2(p, canvas_type = "block")    # Medium resolution  
+ggplotcli2(p, canvas_type = "ascii")    # Basic ASCII
+```
+
+## Supported Geoms
+
+| Geom | Status |
+|------|--------|
+| `geom_point` | ✓ |
+| `geom_line`, `geom_path` | ✓ |
+| `geom_bar`, `geom_col`, `geom_histogram` | ✓ |
+| `geom_density` | ✓ |
+| `geom_smooth` | ✓ |
+| `geom_area` | ✓ |
+| `geom_segment`, `geom_hline`, `geom_vline` | ✓ |
+| `geom_rect` | ✓ |
+| `geom_text` | ✓ |
+| `geom_tile` (heatmaps) | Planned |
+| `geom_boxplot` | Planned |
 
 ## Installation
 
-You can install the plotcli package from GitHub using the devtools package:
-
 ```r
-# Install devtools if you haven't already
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools")
-}
+# From CRAN
+install.packages("plotcli")
 
-# Install plotcli from GitHub
+# Or from GitHub for the latest version
 devtools::install_github("cheuerde/plotcli")
 ```
 
-## Usage
+## Legacy Usage
 
-The easiest way to use the package if you are already familiar with `ggplot2`
-is to configure your ggplot2 object as usual and then simply convert to a `plotcli`
-terminal plot with `ggplotcli`:
+The original `ggplotcli()` function and `plotcli` R6 class are still available:
 
 ```r
-# Load the plotcli package
-library(plotcli)
-
-data(mtcars)
-mtcars$cf = as.character(mtcars$cyl)
-
-p = ggplot(mtcars, aes(x = mpg, y = wt, color = cf)) + geom_point()
-
-# print to terminal
+# Using ggplotcli (original)
+p <- ggplot(iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
+  geom_boxplot()
 ggplotcli(p, braille = FALSE)
+
+# Using plotcli R6 class directly
+pc <- plotcli$new(width = 60, height = 20)
+pc$add_data(mtcars$wt, mtcars$mpg)
+pc$add_title("MPG vs Weight")
+pc$print_plot()
 ```
 
 Check the vignettes for all possible ways of using the package.
@@ -108,4 +158,4 @@ Check the vignettes for all possible ways of using the package.
 
 ## License
 
-`plotcli` is released under the MIT License.
+`plotcli` is released under the LGPL-3 License.

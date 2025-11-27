@@ -1,3 +1,6 @@
+#' @importFrom crayon blue red green yellow magenta cyan silver white black
+NULL
+
 #' Print plot matrix
 #'
 #' This function prints a plot matrix to the console.

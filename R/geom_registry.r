@@ -4,6 +4,10 @@
 #' a dispatch system for converting ggplot2 geoms to terminal plots.
 #'
 #' @name GeomRegistry
+#' @importFrom grDevices col2rgb
+#' @importFrom stats density
+#' @import R6
+#' @import ggplot2
 NULL
 
 #' Geom Registry Environment
