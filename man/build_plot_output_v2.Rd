@@ -11,7 +11,8 @@ build_plot_output_v2(
   height,
   style_opts,
   left_margin,
-  top_margin
+  top_margin,
+  legend_info = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ build_plot_output_v2(
 \item{left_margin}{Left margin size}
 
 \item{top_margin}{Top margin size}
+
+\item{legend_info}{Legend information from extract_legend_info}
 }
 \value{
 Character matrix

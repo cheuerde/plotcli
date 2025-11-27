@@ -71,6 +71,53 @@ extract_plot_labels <- function(built, title, subtitle, caption, axis_labels) {
 }
 
 
+#' Extract Legend Information from ggplot
+#' @keywords internal
+extract_legend_info <- function(built) {
+  # Try to get color/colour scale
+  color_scale <- built$plot$scales$get_scales("colour")
+  fill_scale <- built$plot$scales$get_scales("fill")
+  
+  legend_items <- list()
+  
+  # Extract from color scale
+  if (!is.null(color_scale)) {
+    tryCatch({
+      breaks <- color_scale$get_breaks()
+      labels <- color_scale$get_labels()
+      n <- length(breaks)
+      if (n > 0) {
+        colors <- color_scale$palette(n)
+        legend_items$colour <- list(
+          title = built$plot$labels$colour %||% "colour",
+          labels = labels,
+          colors = colors
+        )
+      }
+    }, error = function(e) NULL)
+  }
+  
+  # Extract from fill scale
+  if (!is.null(fill_scale)) {
+    tryCatch({
+      breaks <- fill_scale$get_breaks()
+      labels <- fill_scale$get_labels()
+      n <- length(breaks)
+      if (n > 0) {
+        colors <- fill_scale$palette(n)
+        legend_items$fill <- list(
+          title = built$plot$labels$fill %||% "fill",
+          labels = labels,
+          colors = colors
+        )
+      }
+    }, error = function(e) NULL)
+  }
+  
+  legend_items
+}
+
+
 #' Render a single panel (non-faceted) plot
 #' @keywords internal
 render_single_panel <- function(built, width, height, canvas_type, style_opts) {
@@ -143,6 +190,9 @@ render_single_panel <- function(built, width, height, canvas_type, style_opts) {
     draw_border(canvas)
   }
   
+  # Extract legend information
+  legend_info <- extract_legend_info(built)
+  
   # Build the final output matrix
   output <- build_plot_output_v2(
     canvas = canvas,
@@ -151,7 +201,8 @@ render_single_panel <- function(built, width, height, canvas_type, style_opts) {
     height = height,
     style_opts = style_opts,
     left_margin = left_margin,
-    top_margin = top_margin
+    top_margin = top_margin,
+    legend_info = legend_info
   )
   
   # Print
@@ -234,15 +285,17 @@ draw_border <- function(canvas) {
 #' @param style_opts Style options
 #' @param left_margin Left margin size
 #' @param top_margin Top margin size
+#' @param legend_info Legend information from extract_legend_info
 #' @return Character matrix
 #' @keywords internal
 build_plot_output_v2 <- function(canvas, scales, width, height, style_opts, 
-                                  left_margin, top_margin) {
+                                  left_margin, top_margin, legend_info = NULL) {
   # Get rendered canvas
   rendered <- canvas$render()
   labels <- style_opts$labels
   show_axes <- style_opts$show_axes
   title_align <- style_opts$title_align
+  legend_position <- style_opts$legend
   
   # Create output matrix
   output <- matrix(" ", nrow = height, ncol = width)
@@ -385,7 +438,76 @@ build_plot_output_v2 <- function(canvas, scales, width, height, style_opts,
     }
   }
   
+  # Add legend if present and not "none"
+  if (!is.null(legend_info) && length(legend_info) > 0 && 
+      !identical(legend_position, "none")) {
+    output <- add_legend_to_output(output, legend_info, legend_position, 
+                                    top_margin, nrow(rendered))
+  }
+  
   return(output)
+}
+
+
+#' Add Legend to Output Matrix
+#' @keywords internal
+add_legend_to_output <- function(output, legend_info, position, top_margin, plot_height) {
+  # Get the first legend (colour or fill)
+  legend <- legend_info$colour %||% legend_info$fill
+  if (is.null(legend)) return(output)
+  
+  n_items <- length(legend$labels)
+  if (n_items == 0) return(output)
+  
+  # Calculate legend dimensions
+  max_label_len <- max(nchar(legend$labels))
+  legend_width <- max_label_len + 3  # "* label"
+  
+  height <- nrow(output)
+  width <- ncol(output)
+  
+  if (position %in% c("right", "auto")) {
+    # Add legend to the right side
+    # Create legend column
+    legend_col <- matrix(" ", nrow = height, ncol = legend_width)
+    
+    # Center legend vertically in plot area
+    legend_start_row <- top_margin + max(1, floor((plot_height - n_items - 1) / 2))
+    
+    # Add title if present
+    if (!is.null(legend$title) && nchar(legend$title) > 0) {
+      title_chars <- strsplit(substr(legend$title, 1, legend_width - 1), "")[[1]]
+      for (i in seq_along(title_chars)) {
+        if (legend_start_row <= height) {
+          legend_col[legend_start_row, i] <- title_chars[i]
+        }
+      }
+      legend_start_row <- legend_start_row + 1
+    }
+    
+    # Add each legend item
+    for (i in seq_len(n_items)) {
+      row <- legend_start_row + i - 1
+      if (row <= height && row >= 1) {
+        # Color indicator (use terminal color)
+        term_color <- color_to_term(legend$colors[i])
+        legend_col[row, 1] <- make_colored("*", term_color)
+        
+        # Label
+        label_chars <- strsplit(legend$labels[i], "")[[1]]
+        for (j in seq_along(label_chars)) {
+          if (j + 2 <= legend_width) {
+            legend_col[row, j + 2] <- label_chars[j]
+          }
+        }
+      }
+    }
+    
+    # Append legend to output
+    output <- cbind(output, legend_col)
+  }
+  
+  output
 }
 
 
@@ -404,13 +526,14 @@ build_plot_output <- function(canvas, scales, width, height, show_axes, title) {
   style_opts <- list(
     show_axes = show_axes,
     title_align = "center",
+    legend = "none",
     labels = list(title = title, subtitle = NULL, caption = NULL, x = NULL, y = NULL)
   )
   
   left_margin <- if (show_axes) 6 else 0
   top_margin <- if (!is.null(title)) 1 else 0
   
-  build_plot_output_v2(canvas, scales, width, height, style_opts, left_margin, top_margin)
+  build_plot_output_v2(canvas, scales, width, height, style_opts, left_margin, top_margin, NULL)
 }
 
 
@@ -666,6 +789,16 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
         }
       }
     }
+  }
+  
+  # Add legend if present
+  legend_info <- extract_legend_info(built)
+  if (!is.null(legend_info) && length(legend_info) > 0 && 
+      !identical(style_opts$legend, "none")) {
+    # Calculate plot height for legend centering
+    plot_height <- panel_height * n_rows
+    output <- add_legend_to_output(output, legend_info, style_opts$legend, 
+                                    top_margin, plot_height)
   }
   
   # Print
