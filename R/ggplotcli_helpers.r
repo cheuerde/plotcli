@@ -460,9 +460,10 @@ add_legend_to_output <- function(output, legend_info, position, top_margin, plot
   n_items <- length(legend$labels)
   if (n_items == 0) return(output)
   
-  # Calculate legend dimensions
+  # Calculate legend dimensions - include title width
   max_label_len <- max(nchar(legend$labels))
-  legend_width <- max_label_len + 3  # "* label"
+  title_len <- if (!is.null(legend$title)) nchar(legend$title) else 0
+  legend_width <- max(max_label_len + 3, title_len + 1)  # "* label" or "Title "
   
   height <- nrow(output)
   width <- ncol(output)
@@ -636,18 +637,24 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
   show_axes <- style_opts$show_axes
   
   # Calculate dimensions for each panel
-  # Reserve space for: title, facet labels, axes
-  top_margin <- if (!is.null(labels$title)) 2 else 1
+  # Reserve space for: title, subtitle, facet labels, axes, x label
+  top_margin <- 1  # At least 1 for facet labels
+  if (!is.null(labels$title)) top_margin <- top_margin + 1
+  if (!is.null(labels$subtitle)) top_margin <- top_margin + 1
+  bottom_margin <- 2  # For x-axis values
+  if (!is.null(labels$x)) bottom_margin <- bottom_margin + 1  # Extra row for x label
   left_margin <- if (show_axes) 7 else 0
+  if (!is.null(labels$y) && left_margin > 0) left_margin <- left_margin + 1  # Extra col for y label
   
   # Calculate panel dimensions
   panel_width <- floor((width - left_margin) / n_cols)
-  panel_height <- floor((height - top_margin - 2) / n_rows)  # -2 for x-axis
+  panel_height <- floor((height - top_margin - bottom_margin) / n_rows)
   
   # Create output matrix
   output <- matrix(" ", nrow = height, ncol = width)
   
   # Add title if present
+  current_row <- 1
   if (!is.null(labels$title)) {
     title_chars <- strsplit(substr(labels$title, 1, width), "")[[1]]
     if (style_opts$title_align == "center") {
@@ -656,7 +663,21 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
       start_col <- left_margin + 1
     }
     for (i in seq_along(title_chars)) {
-      output[1, start_col + i - 1] <- title_chars[i]
+      output[current_row, start_col + i - 1] <- title_chars[i]
+    }
+    current_row <- current_row + 1
+  }
+  
+  # Add subtitle if present
+  if (!is.null(labels$subtitle)) {
+    sub_chars <- strsplit(substr(labels$subtitle, 1, width), "")[[1]]
+    if (style_opts$title_align == "center") {
+      start_col <- max(1, floor((width - length(sub_chars)) / 2))
+    } else {
+      start_col <- left_margin + 1
+    }
+    for (i in seq_along(sub_chars)) {
+      output[current_row, start_col + i - 1] <- sub_chars[i]
     }
   }
   
@@ -793,6 +814,36 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
               }
             }
           }
+        }
+      }
+    }
+  }
+  
+  # Add Y axis label (vertically on the left)
+  if (!is.null(labels$y) && left_margin >= 2) {
+    y_label <- labels$y
+    y_chars <- strsplit(substr(y_label, 1, min(nchar(y_label), panel_height * n_rows)), "")[[1]]
+    label_start <- top_margin + floor((panel_height * n_rows - length(y_chars)) / 2)
+    for (i in seq_along(y_chars)) {
+      row <- label_start + i
+      if (row >= 1 && row <= height) {
+        output[row, 1] <- y_chars[i]
+      }
+    }
+  }
+  
+  # Add X axis label (centered at bottom)
+  if (!is.null(labels$x)) {
+    x_row <- top_margin + panel_height * n_rows + 2
+    if (x_row <= height) {
+      x_label <- substr(labels$x, 1, width - left_margin)
+      x_chars <- strsplit(x_label, "")[[1]]
+      # Center across all panels
+      plot_area_width <- panel_width * n_cols
+      start_col <- left_margin + floor((plot_area_width - length(x_chars)) / 2)
+      for (i in seq_along(x_chars)) {
+        if (start_col + i - 1 >= 1 && start_col + i - 1 <= width) {
+          output[x_row, start_col + i - 1] <- x_chars[i]
         }
       }
     }
