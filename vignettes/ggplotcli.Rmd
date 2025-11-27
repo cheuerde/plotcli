@@ -253,15 +253,14 @@ df <- data.frame(
   )
 )
 
-p <- ggplot(df, aes(x = timepoint, y = response, fill = treatment)) +
-  geom_boxplot() +
-  facet_wrap(~treatment) +
+p <- ggplot(df, aes(x = timepoint, y = response)) +
+  geom_boxplot(aes(fill = treatment)) +
   labs(title = "Treatment Response Over Time",
        subtitle = "Faceted by treatment group",
        x = "Timepoint", y = "Response") +
   theme_bw()
 
-ggplotcli(p, width = 85, height = 22, boxplot_style = "ascii")
+ggplotcli(p, width = 100, height = 22, boxplot_style = "ascii")
 ```
 
 ### Multi-Layer Scientific Plot
