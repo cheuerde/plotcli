@@ -5,11 +5,12 @@
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/plotcli)](https://www.r-pkg.org/pkg/plotcli)
 [![Downloads](https://cranlogs.r-pkg.org/badges/plotcli?color=blue)](https://www.r-pkg.org/pkg/plotcli)
 
+<p align="center">
+  <img src="docs/scatter.png" alt="Scatter Plot" width="600">
+</p>
 
-![Colored Density Plot on Terminal](docs/boxplot.jpg)
-
-plotcli is an R package that brings the power of command-line plotting to your R environment. 
-With a simple and intuitive interface, plotcli allows you to create and customize a 
+plotcli is an R package that brings the power of command-line plotting to your R environment.
+With a simple and intuitive interface, plotcli allows you to create and customize a
 variety of plot types directly in your console using Unicode Braille characters and ANSI colors.
 
 ## Features
@@ -142,11 +143,57 @@ Check the vignettes for all possible ways of using the package.
 
 ## Showcase
 
-![Colored Density Plot on Terminal](docs/scatter.jpg)
-![Colored Density Plot on Terminal](docs/density_raw.jpg)
-![Colored Density Plot on Terminal](docs/regression.jpg)
-![Colored Density Plot on Terminal](docs/hist.jpg)
-![Colored Density Plot on Terminal](docs/pca.jpg)
+### Density Plots with Fill Colors
+<p align="center">
+  <img src="docs/density.png" alt="Density Plot" width="600">
+</p>
+
+### Heatmaps with Diverging Color Scales
+<p align="center">
+  <img src="docs/heatmap.png" alt="Heatmap" width="600">
+</p>
+
+### Faceted Plots (facet_wrap)
+<p align="center">
+  <img src="docs/facet.png" alt="Faceted Plot" width="700">
+</p>
+
+### Boxplots with Outliers
+<p align="center">
+  <img src="docs/boxplot.png" alt="Boxplot" width="600">
+</p>
+
+### Histogram with Density Overlay
+<p align="center">
+  <img src="docs/histogram.png" alt="Histogram" width="600">
+</p>
+
+### Line Charts with Smoothing
+<p align="center">
+  <img src="docs/line.png" alt="Line Chart" width="600">
+</p>
+
+### Bar Charts
+<p align="center">
+  <img src="docs/bar.png" alt="Bar Chart" width="600">
+</p>
+
+### Canvas Types
+
+**Block canvas** - medium resolution using block characters:
+<p align="center">
+  <img src="docs/block.png" alt="Block Canvas" width="600">
+</p>
+
+**ASCII canvas** - basic ASCII for maximum compatibility:
+<p align="center">
+  <img src="docs/ascii.png" alt="ASCII Canvas" width="600">
+</p>
+
+### Facet Grid (2D Faceting)
+<p align="center">
+  <img src="docs/facet_grid.png" alt="Facet Grid" width="700">
+</p>
 
 ## Similar Projects
 

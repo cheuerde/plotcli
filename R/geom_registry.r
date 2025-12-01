@@ -598,26 +598,38 @@ geom_boxplot_handler <- function(data, canvas, scales, params, style_opts = NULL
       box_bottom <- max(char_lower, char_upper)
       
       # Draw whiskers (vertical lines) - use char_x (true center from data)
-      whisker_rows_lower <- seq(min(char_lower, char_ymin), max(char_lower, char_ymin))
-      for (row in whisker_rows_lower) {
-        if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
-          canvas$matrix[row, char_x] <- make_colored(vert, fill_color)
+      # Only draw whiskers OUTSIDE the box (between ymin and lower, between upper and ymax)
+      # Lower whisker: from ymin to just before lower (box_bottom)
+      if (char_ymin != box_bottom) {
+        whisker_rows_lower <- seq(min(box_bottom, char_ymin), max(box_bottom, char_ymin))
+        # Exclude the box edge itself
+        whisker_rows_lower <- whisker_rows_lower[whisker_rows_lower != box_bottom]
+        for (row in whisker_rows_lower) {
+          if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
+            canvas$matrix[row, char_x] <- make_colored(vert, fill_color)
+          }
         }
       }
-      whisker_rows_upper <- seq(min(char_upper, char_ymax), max(char_upper, char_ymax))
-      for (row in whisker_rows_upper) {
-        if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
-          canvas$matrix[row, char_x] <- make_colored(vert, fill_color)
+      # Upper whisker: from just after upper (box_top) to ymax
+      if (char_ymax != box_top) {
+        whisker_rows_upper <- seq(min(box_top, char_ymax), max(box_top, char_ymax))
+        # Exclude the box edge itself
+        whisker_rows_upper <- whisker_rows_upper[whisker_rows_upper != box_top]
+        for (row in whisker_rows_upper) {
+          if (row >= 1 && row <= n_rows && char_x >= 1 && char_x <= n_cols) {
+            canvas$matrix[row, char_x] <- make_colored(vert, fill_color)
+          }
         }
       }
-      
+
       # Draw whisker caps (horizontal lines) - same width as median (inside box)
+      # Only draw caps if they differ from the box edges
       for (col in (box_left + 1):(box_right - 1)) {
         if (col >= 1 && col <= n_cols) {
-          if (char_ymin >= 1 && char_ymin <= n_rows) {
+          if (char_ymin >= 1 && char_ymin <= n_rows && char_ymin != box_bottom) {
             canvas$matrix[char_ymin, col] <- make_colored(horiz, fill_color)
           }
-          if (char_ymax >= 1 && char_ymax <= n_rows) {
+          if (char_ymax >= 1 && char_ymax <= n_rows && char_ymax != box_top) {
             canvas$matrix[char_ymax, col] <- make_colored(horiz, fill_color)
           }
         }
