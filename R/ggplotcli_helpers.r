@@ -81,9 +81,27 @@ extract_legend_info <- function(built) {
   # Try to get color/colour scale
   color_scale <- built$plot$scales$get_scales("colour")
   fill_scale <- built$plot$scales$get_scales("fill")
-  
+
   legend_items <- list()
-  
+
+  # Helper to extract colors from a scale (handles both discrete and continuous)
+  get_scale_colors <- function(scale, n) {
+    # First try direct palette call (works for discrete scales)
+    colors <- tryCatch(scale$palette(n), error = function(e) NULL)
+
+    # If that returned NA or NULL, try continuous scale approach
+    if (is.null(colors) || (length(colors) == 1 && is.na(colors[1])) ||
+        all(is.na(colors))) {
+      # For continuous scales, palette expects values in [0, 1]
+      colors <- tryCatch(
+        scale$palette(seq(0, 1, length.out = n)),
+        error = function(e) NULL
+      )
+    }
+
+    colors
+  }
+
   # Extract from color scale
   if (!is.null(color_scale)) {
     tryCatch({
@@ -91,16 +109,18 @@ extract_legend_info <- function(built) {
       labels <- color_scale$get_labels()
       n <- length(breaks)
       if (n > 0) {
-        colors <- color_scale$palette(n)
-        legend_items$colour <- list(
-          title = built$plot$labels$colour %||% "colour",
-          labels = labels,
-          colors = colors
-        )
+        colors <- get_scale_colors(color_scale, n)
+        if (!is.null(colors) && !all(is.na(colors))) {
+          legend_items$colour <- list(
+            title = built$plot$labels$colour %||% "colour",
+            labels = labels,
+            colors = colors
+          )
+        }
       }
     }, error = function(e) NULL)
   }
-  
+
   # Extract from fill scale
   if (!is.null(fill_scale)) {
     tryCatch({
@@ -108,16 +128,18 @@ extract_legend_info <- function(built) {
       labels <- fill_scale$get_labels()
       n <- length(breaks)
       if (n > 0) {
-        colors <- fill_scale$palette(n)
-        legend_items$fill <- list(
-          title = built$plot$labels$fill %||% "fill",
-          labels = labels,
-          colors = colors
-        )
+        colors <- get_scale_colors(fill_scale, n)
+        if (!is.null(colors) && !all(is.na(colors))) {
+          legend_items$fill <- list(
+            title = built$plot$labels$fill %||% "fill",
+            labels = labels,
+            colors = colors
+          )
+        }
       }
     }, error = function(e) NULL)
   }
-  
+
   legend_items
 }
 
@@ -154,9 +176,10 @@ render_single_panel <- function(built, width, height, canvas_type, style_opts) {
   # Create canvas for plot area
   canvas <- create_canvas(plot_width, plot_height, canvas_type)
   
-  # Create scales (with border padding if needed)
-  scales <- create_scales(built, canvas$pixel_width, canvas$pixel_height, 
-                          has_border = style_opts$border)
+  # Create scales (with border padding if needed, using canvas multipliers)
+  scales <- create_scales(built, canvas$pixel_width, canvas$pixel_height,
+                          has_border = style_opts$border,
+                          x_mult = canvas$x_mult, y_mult = canvas$y_mult)
   
   # Draw grid lines first (behind data)
   if (style_opts$grid != "none") {
@@ -358,26 +381,49 @@ build_plot_output_v2 <- function(canvas, scales, width, height, style_opts,
   
   # Draw Y axis values
   if (show_axes) {
-    y_ticks <- pretty(scales$y_range, n = 5)
-    y_ticks <- y_ticks[y_ticks >= scales$y_range[1] & y_ticks <= scales$y_range[2]]
-    
-    for (tick in y_ticks) {
-      y_frac <- (tick - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
-      row <- round(nrow(rendered) - y_frac * (nrow(rendered) - 1)) + top_margin
-      
-      if (row >= 1 && row <= height) {
-        label <- format_axis_label(tick)
-        label_chars <- strsplit(label, "")[[1]]
-        
-        start_col <- max(1, left_margin - length(label_chars))
-        for (i in seq_along(label_chars)) {
-          if (start_col + i - 1 < left_margin) {
-            output[row, start_col + i - 1] <- label_chars[i]
+    # Check if we have discrete y labels
+    if (!is.null(scales$y_labels) && length(scales$y_labels) > 0) {
+      # Use discrete labels for y-axis
+      for (i in seq_along(scales$y_labels)) {
+        pos <- scales$y_label_positions[i]
+        y_frac <- (pos - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
+        row <- round(nrow(rendered) - y_frac * (nrow(rendered) - 1)) + top_margin
+
+        if (row >= 1 && row <= height) {
+          label <- scales$y_labels[i]
+          label_chars <- strsplit(label, "")[[1]]
+
+          start_col <- max(1, left_margin - length(label_chars))
+          for (j in seq_along(label_chars)) {
+            if (start_col + j - 1 < left_margin) {
+              output[row, start_col + j - 1] <- label_chars[j]
+            }
+          }
+        }
+      }
+    } else {
+      # Use numeric ticks for y-axis
+      y_ticks <- pretty(scales$y_range, n = 5)
+      y_ticks <- y_ticks[y_ticks >= scales$y_range[1] & y_ticks <= scales$y_range[2]]
+
+      for (tick in y_ticks) {
+        y_frac <- (tick - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
+        row <- round(nrow(rendered) - y_frac * (nrow(rendered) - 1)) + top_margin
+
+        if (row >= 1 && row <= height) {
+          label <- format_axis_label(tick)
+          label_chars <- strsplit(label, "")[[1]]
+
+          start_col <- max(1, left_margin - length(label_chars))
+          for (j in seq_along(label_chars)) {
+            if (start_col + j - 1 < left_margin) {
+              output[row, start_col + j - 1] <- label_chars[j]
+            }
           }
         }
       }
     }
-    
+
     # Draw X axis values
     x_row <- top_margin + nrow(rendered) + 1
     
@@ -730,10 +776,11 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
     
     canvas <- create_canvas(canvas_width, canvas_height, canvas_type)
     
-    # Create scales for this panel (with border padding if needed)
+    # Create scales for this panel (with border padding if needed, using canvas multipliers)
     panel_params <- built$layout$panel_params[[panel_idx]]
-    scales <- create_panel_scales(panel_params, canvas$pixel_width, canvas$pixel_height, 
-                                   has_border = style_opts$border)
+    scales <- create_panel_scales(panel_params, canvas$pixel_width, canvas$pixel_height,
+                                   has_border = style_opts$border,
+                                   x_mult = canvas$x_mult, y_mult = canvas$y_mult)
     
     # Draw grid lines first (behind data)
     if (style_opts$grid != "none") {
@@ -801,20 +848,42 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
     
     # Add Y axis for leftmost panels
     if (panel_col == 1 && show_axes) {
-      y_ticks <- pretty(scales$y_range, n = 3)
-      y_ticks <- y_ticks[y_ticks >= scales$y_range[1] & y_ticks <= scales$y_range[2]]
-      
-      for (tick in y_ticks) {
-        y_frac <- (tick - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
-        row <- out_row_start + 1 + round((1 - y_frac) * (canvas_height - 1))
-        
-        if (row >= 1 && row <= height) {
-          label <- format_axis_label(tick)
-          label_chars <- strsplit(label, "")[[1]]
-          start_col <- max(1, left_margin - length(label_chars))
-          for (i in seq_along(label_chars)) {
-            if (start_col + i - 1 <= left_margin && start_col + i - 1 >= 1) {
-              output[row, start_col + i - 1] <- label_chars[i]
+      # Check if we have discrete y labels
+      if (!is.null(scales$y_labels) && length(scales$y_labels) > 0) {
+        # Use discrete labels for y-axis
+        for (i in seq_along(scales$y_labels)) {
+          pos <- scales$y_label_positions[i]
+          y_frac <- (pos - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
+          row <- out_row_start + 1 + round((1 - y_frac) * (canvas_height - 1))
+
+          if (row >= 1 && row <= height) {
+            label <- scales$y_labels[i]
+            label_chars <- strsplit(label, "")[[1]]
+            start_col <- max(1, left_margin - length(label_chars))
+            for (j in seq_along(label_chars)) {
+              if (start_col + j - 1 <= left_margin && start_col + j - 1 >= 1) {
+                output[row, start_col + j - 1] <- label_chars[j]
+              }
+            }
+          }
+        }
+      } else {
+        # Use numeric ticks for y-axis
+        y_ticks <- pretty(scales$y_range, n = 3)
+        y_ticks <- y_ticks[y_ticks >= scales$y_range[1] & y_ticks <= scales$y_range[2]]
+
+        for (tick in y_ticks) {
+          y_frac <- (tick - scales$y_range[1]) / (scales$y_range[2] - scales$y_range[1])
+          row <- out_row_start + 1 + round((1 - y_frac) * (canvas_height - 1))
+
+          if (row >= 1 && row <= height) {
+            label <- format_axis_label(tick)
+            label_chars <- strsplit(label, "")[[1]]
+            start_col <- max(1, left_margin - length(label_chars))
+            for (j in seq_along(label_chars)) {
+              if (start_col + j - 1 <= left_margin && start_col + j - 1 >= 1) {
+                output[row, start_col + j - 1] <- label_chars[j]
+              }
             }
           }
         }
@@ -927,22 +996,31 @@ render_faceted_plot <- function(built, facet_info, width, height, canvas_type,
 #' @param has_border Whether a border will be drawn (adds padding)
 #' @return List with scale functions
 #' @keywords internal
-create_panel_scales <- function(panel_params, plot_width, plot_height, has_border = FALSE) {
+create_panel_scales <- function(panel_params, plot_width, plot_height, has_border = FALSE,
+                                x_mult = 1, y_mult = 1) {
 
   # Get x and y ranges from panel params
   x_range <- panel_params$x.range
   y_range <- panel_params$y.range
-  
+
   # Fallback if ranges not available
   if (is.null(x_range)) x_range <- c(0, 1)
   if (is.null(y_range)) y_range <- c(0, 1)
-  
+
   # Add padding if border is present to prevent data from overlapping border
-  padding <- if (has_border) 2 else 0
-  x_min <- 1 + padding
-  x_max <- plot_width - padding
-  y_min <- 1 + padding
-  y_max <- plot_height - padding
+  # Padding must be at least the canvas multiplier to ensure data stays in
+  # a different character cell than the border (e.g., braille is 2x4 per char)
+  if (has_border) {
+    x_padding <- x_mult + 1  # Move past border character cell
+    y_padding <- y_mult + 1
+  } else {
+    x_padding <- 0
+    y_padding <- 0
+  }
+  x_min <- 1 + x_padding
+  x_max <- plot_width - x_padding
+  y_min <- 1 + y_padding
+  y_max <- plot_height - y_padding
   
   # Ensure we have valid ranges
   if (x_max <= x_min) {
@@ -963,25 +1041,45 @@ create_panel_scales <- function(panel_params, plot_width, plot_height, has_borde
     y_max - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (y_max - y_min)
   }
   
-  # Check for discrete x-axis labels
+  # Check for discrete x-axis labels (only use labels for discrete scales)
   x_labels <- NULL
   x_label_positions <- NULL
-  if (!is.null(panel_params$x) && !is.null(panel_params$x$breaks)) {
+  x_is_discrete <- !is.null(panel_params$x) &&
+                   !is.null(panel_params$x$is_discrete) &&
+                   tryCatch(panel_params$x$is_discrete(), error = function(e) FALSE)
+
+  if (x_is_discrete && !is.null(panel_params$x$breaks)) {
     x_labels <- panel_params$x$get_labels()
     x_label_positions <- attr(panel_params$x$breaks, "pos")
     if (is.null(x_label_positions)) {
       x_label_positions <- seq_along(x_labels)
     }
+    # Filter out NA values from labels and positions
+    if (!is.null(x_labels) && length(x_labels) > 0) {
+      valid <- !is.na(x_labels)
+      x_labels <- x_labels[valid]
+      x_label_positions <- x_label_positions[valid]
+    }
   }
-  
-  # Check for discrete y-axis labels
+
+  # Check for discrete y-axis labels (only use labels for discrete scales)
   y_labels <- NULL
   y_label_positions <- NULL
-  if (!is.null(panel_params$y) && !is.null(panel_params$y$breaks)) {
+  y_is_discrete <- !is.null(panel_params$y) &&
+                   !is.null(panel_params$y$is_discrete) &&
+                   tryCatch(panel_params$y$is_discrete(), error = function(e) FALSE)
+
+  if (y_is_discrete && !is.null(panel_params$y$breaks)) {
     y_labels <- panel_params$y$get_labels()
     y_label_positions <- attr(panel_params$y$breaks, "pos")
     if (is.null(y_label_positions)) {
       y_label_positions <- seq_along(y_labels)
+    }
+    # Filter out NA values from labels and positions
+    if (!is.null(y_labels) && length(y_labels) > 0) {
+      valid <- !is.na(y_labels)
+      y_labels <- y_labels[valid]
+      y_label_positions <- y_label_positions[valid]
     }
   }
   

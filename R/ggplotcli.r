@@ -145,8 +145,8 @@ ggplotcli <- function(p,
   # Build the plot to get computed data
   built <- ggplot2::ggplot_build(p)
   
-  # Initialize color mapping for all colors in the plot
-  # This ensures we minimize color repetition across groups
+  # Initialize color mapping for all colors in the plot (including legend colors)
+  # This ensures we minimize color repetition across groups and consistent legend
   all_colors <- c()
   for (layer_data in built$data) {
     if ("colour" %in% names(layer_data)) {
@@ -156,6 +156,48 @@ ggplotcli <- function(p,
       all_colors <- c(all_colors, layer_data$fill)
     }
   }
+
+  # Also include legend colors for consistent mapping
+  # Helper to extract colors from a scale (handles both discrete and continuous)
+  get_scale_colors <- function(scale, n) {
+    colors <- tryCatch(scale$palette(n), error = function(e) NULL)
+    if (is.null(colors) || (length(colors) == 1 && is.na(colors[1])) ||
+        all(is.na(colors))) {
+      colors <- tryCatch(scale$palette(seq(0, 1, length.out = n)), error = function(e) NULL)
+    }
+    colors
+  }
+
+  # Get legend colors from colour scale
+  color_scale <- built$plot$scales$get_scales("colour")
+  if (!is.null(color_scale)) {
+    tryCatch({
+      breaks <- color_scale$get_breaks()
+      n <- length(breaks)
+      if (n > 0) {
+        legend_cols <- get_scale_colors(color_scale, n)
+        if (!is.null(legend_cols) && !all(is.na(legend_cols))) {
+          all_colors <- c(all_colors, legend_cols)
+        }
+      }
+    }, error = function(e) NULL)
+  }
+
+  # Get legend colors from fill scale
+  fill_scale <- built$plot$scales$get_scales("fill")
+  if (!is.null(fill_scale)) {
+    tryCatch({
+      breaks <- fill_scale$get_breaks()
+      n <- length(breaks)
+      if (n > 0) {
+        legend_cols <- get_scale_colors(fill_scale, n)
+        if (!is.null(legend_cols) && !all(is.na(legend_cols))) {
+          all_colors <- c(all_colors, legend_cols)
+        }
+      }
+    }, error = function(e) NULL)
+  }
+
   init_color_mapping(unique(all_colors))
   
   # Extract styling from ggplot theme

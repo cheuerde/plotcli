@@ -80,29 +80,38 @@ is_geom_registered <- function(geom_name) {
 #' @param has_border Whether a border will be drawn (adds padding)
 #' @return List with x_scale and y_scale functions
 #' @export
-create_scales <- function(built, plot_width, plot_height, has_border = FALSE) {
+create_scales <- function(built, plot_width, plot_height, has_border = FALSE,
+                          x_mult = 1, y_mult = 1) {
   # Get the panel parameters (contains scale ranges)
   layout <- built$layout
   panel_params <- layout$panel_params[[1]]
-  
+
   # X scale
   x_range <- panel_params$x.range
   if (is.null(x_range)) {
     x_range <- range(built$data[[1]]$x, na.rm = TRUE)
   }
-  
+
   # Y scale
   y_range <- panel_params$y.range
   if (is.null(y_range)) {
     y_range <- range(built$data[[1]]$y, na.rm = TRUE)
   }
-  
-  # Add padding if border is present to prevent data from overlapping border
-  padding <- if (has_border) 2 else 0
-  x_min <- 1 + padding
-  x_max <- plot_width - padding
-  y_min <- 1 + padding
-  y_max <- plot_height - padding
+
+ # Add padding if border is present to prevent data from overlapping border
+  # Padding must be at least the canvas multiplier to ensure data stays in
+  # a different character cell than the border (e.g., braille is 2x4 per char)
+  if (has_border) {
+    x_padding <- x_mult + 1  # Move past border character cell
+    y_padding <- y_mult + 1
+  } else {
+    x_padding <- 0
+    y_padding <- 0
+  }
+  x_min <- 1 + x_padding
+  x_max <- plot_width - x_padding
+  y_min <- 1 + y_padding
+  y_max <- plot_height - y_padding
   
   # Ensure we have valid ranges
   if (x_max <= x_min) {
@@ -124,28 +133,48 @@ create_scales <- function(built, plot_width, plot_height, has_border = FALSE) {
     y_max - ((y - y_range[1]) / (y_range[2] - y_range[1])) * (y_max - y_min)
   }
   
-  # Check for discrete x-axis labels
+  # Check for discrete x-axis labels (only use for discrete scales)
   x_labels <- NULL
   x_label_positions <- NULL
-  if (!is.null(panel_params$x) && !is.null(panel_params$x$breaks)) {
+  x_is_discrete <- !is.null(panel_params$x) &&
+                   !is.null(panel_params$x$is_discrete) &&
+                   tryCatch(panel_params$x$is_discrete(), error = function(e) FALSE)
+
+  if (x_is_discrete && !is.null(panel_params$x$breaks)) {
     x_labels <- panel_params$x$get_labels()
     x_label_positions <- attr(panel_params$x$breaks, "pos")
     if (is.null(x_label_positions)) {
       x_label_positions <- seq_along(x_labels)
     }
+    # Filter out NA values
+    if (!is.null(x_labels) && length(x_labels) > 0) {
+      valid <- !is.na(x_labels)
+      x_labels <- x_labels[valid]
+      x_label_positions <- x_label_positions[valid]
+    }
   }
-  
-  # Check for discrete y-axis labels
+
+  # Check for discrete y-axis labels (only use for discrete scales)
   y_labels <- NULL
   y_label_positions <- NULL
-  if (!is.null(panel_params$y) && !is.null(panel_params$y$breaks)) {
+  y_is_discrete <- !is.null(panel_params$y) &&
+                   !is.null(panel_params$y$is_discrete) &&
+                   tryCatch(panel_params$y$is_discrete(), error = function(e) FALSE)
+
+  if (y_is_discrete && !is.null(panel_params$y$breaks)) {
     y_labels <- panel_params$y$get_labels()
     y_label_positions <- attr(panel_params$y$breaks, "pos")
     if (is.null(y_label_positions)) {
       y_label_positions <- seq_along(y_labels)
     }
+    # Filter out NA values
+    if (!is.null(y_labels) && length(y_labels) > 0) {
+      valid <- !is.na(y_labels)
+      y_labels <- y_labels[valid]
+      y_label_positions <- y_label_positions[valid]
+    }
   }
-  
+
   list(
     x = x_scale,
     y = y_scale,
@@ -443,13 +472,20 @@ geom_density_handler <- function(data, canvas, scales, params, style_opts = NULL
     
     if (nrow(grp_data) < 2) next
     
-    # Get color
-    color <- if ("colour" %in% names(grp_data)) {
+    # Get color - prefer fill over colour for density plots
+    # (density plots typically use fill aesthetic for distinction)
+    color <- if ("fill" %in% names(grp_data) &&
+                 !is.na(grp_data$fill[1]) &&
+                 grp_data$fill[1] != "grey20") {
+      color_to_term(grp_data$fill[1])
+    } else if ("colour" %in% names(grp_data) &&
+               !is.na(grp_data$colour[1]) &&
+               grp_data$colour[1] != "black") {
       color_to_term(grp_data$colour[1])
     } else {
       NULL
     }
-    
+
     # Use density as y
     xs <- sapply(grp_data$x, scales$x)
     ys <- sapply(grp_data$density, scales$y)
@@ -878,6 +914,66 @@ color_to_term <- function(color) {
 }
 
 
+#' GeomTile Handler
+#'
+#' Renders tiles/heatmaps. Tiles use center (x, y) coordinates with width/height.
+#' @keywords internal
+geom_tile_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  # Get fill colors
+  colors <- if ("fill" %in% names(data)) data$fill else rep("white", nrow(data))
+
+  # Default tile dimensions (usually 1 for discrete scales)
+  default_width <- if ("width" %in% names(data) && !is.na(data$width[1])) data$width[1] else 1
+  default_height <- if ("height" %in% names(data) && !is.na(data$height[1])) data$height[1] else 1
+
+  for (i in seq_len(nrow(data))) {
+    # Get center coordinates - skip if NA
+    x_center <- data$x[i]
+    y_center <- data$y[i]
+    if (is.na(x_center) || is.na(y_center)) next
+
+    # Get tile dimensions
+    tile_width <- if ("width" %in% names(data) && !is.na(data$width[i])) {
+      data$width[i]
+    } else {
+      default_width
+    }
+    tile_height <- if ("height" %in% names(data) && !is.na(data$height[i])) {
+      data$height[i]
+    } else {
+      default_height
+    }
+
+    # Calculate corners from center
+    xmin <- x_center - tile_width / 2
+    xmax <- x_center + tile_width / 2
+    ymin <- y_center - tile_height / 2
+    ymax <- y_center + tile_height / 2
+
+    # Scale to canvas coordinates
+    xmin_scaled <- scales$x(xmin)
+    xmax_scaled <- scales$x(xmax)
+    ymin_scaled <- scales$y(ymin)
+    ymax_scaled <- scales$y(ymax)
+
+    # Check for valid coordinates
+    if (any(is.na(c(xmin_scaled, xmax_scaled, ymin_scaled, ymax_scaled)))) next
+
+    # Get color
+    color <- colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    # Draw filled rectangle (note: y is inverted in canvas coordinates)
+    canvas$fill_rect(round(xmin_scaled), round(ymax_scaled),
+                     round(xmax_scaled), round(ymin_scaled), color)
+  }
+}
+
+
 # ============================================================================
 # Register Built-in Geoms
 # ============================================================================
@@ -893,6 +989,7 @@ color_to_term <- function(color) {
   register_geom("GeomHline", geom_hline_handler)
   register_geom("GeomVline", geom_vline_handler)
   register_geom("GeomRect", geom_rect_handler)
+  register_geom("GeomTile", geom_tile_handler)
   register_geom("GeomSmooth", geom_smooth_handler)
   register_geom("GeomDensity", geom_density_handler)
   register_geom("GeomHistogram", geom_histogram_handler)
