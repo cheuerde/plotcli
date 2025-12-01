@@ -4,12 +4,13 @@
 
 ### Enhanced ggplotcli: Universal ggplot2 Converter
 
-The `ggplotcli()` function has been completely rewritten to render any ggplot2 
+The `ggplotcli()` function has been completely rewritten to render any ggplot2
 plot in the terminal:
 
-* **15 Supported Geoms**: `geom_point`, `geom_line`, `geom_path`, `geom_bar`, 
-  `geom_col`, `geom_histogram`, `geom_density`, `geom_smooth`, `geom_area`, 
-  `geom_segment`, `geom_hline`, `geom_vline`, `geom_rect`, `geom_text`, `geom_boxplot`
+* **16 Supported Geoms**: `geom_point`, `geom_line`, `geom_path`, `geom_bar`,
+  `geom_col`, `geom_histogram`, `geom_density`, `geom_smooth`, `geom_area`,
+  `geom_segment`, `geom_hline`, `geom_vline`, `geom_rect`, `geom_text`,
+  `geom_boxplot`, `geom_tile`
 
 * **Legend Support**: Automatic legends for color and fill aesthetics
 
@@ -52,6 +53,12 @@ New R6-based canvas system providing:
 Extensible system for adding custom geom handlers, making it easy to add 
 support for additional ggplot2 geoms.
 
+### Heatmap Support
+
+* New `geom_tile` handler for rendering heatmaps
+* Works with continuous color scales (`scale_fill_gradient`, `scale_fill_viridis_c`, etc.)
+* Supports faceted heatmaps with `facet_wrap()` and `facet_grid()`
+
 ## Improvements
 
 * Improved Braille bit mapping for more accurate scatter and line plots
@@ -60,6 +67,15 @@ support for additional ggplot2 geoms.
 * Fixed axis label formatting (0 now displays as "0", not "0.0e+0")
 * Fixed border overlap issue - data no longer appears on/within borders
 * Fixed is_braille error with ANSI color codes
+
+## Bug Fixes (Latest)
+
+* Fixed `geom_density` not showing distinct colors when using `fill` aesthetic
+* Fixed heatmap legend colors not matching plot colors (legend colors now included
+  in color mapping for consistency)
+* Fixed colors not appearing in non-interactive R sessions (Rscript) by enabling
+  crayon colors automatically on package load
+* Fixed discrete x-axis labels showing numeric positions instead of category names
 
 ## Documentation
 

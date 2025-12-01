@@ -15,7 +15,7 @@ variety of plot types directly in your console using Unicode Braille characters 
 ## Features
 
 - **`ggplotcli`**: Universal ggplot2 converter - render *any* ggplot in the terminal
-- **14 Supported Geoms**: points, lines, bars, histograms, density, smooth, area, segments, and more
+- **16 Supported Geoms**: points, lines, bars, histograms, density, smooth, area, boxplot, tile/heatmaps, and more
 - **Faceting**: Full support for `facet_wrap()` and `facet_grid()`
 - **Theme Auto-Detection**: Automatically respects ggplot2 themes (borders, grids)
 - **Multiple Canvas Types**: Braille (high-res), Block, or ASCII
@@ -110,7 +110,7 @@ ggplotcli(p, canvas_type = "ascii")    # Basic ASCII
 | `geom_rect` | ✓ |
 | `geom_text` | ✓ |
 | `geom_boxplot` | ✓ |
-| `geom_tile` (heatmaps) | Planned |
+| `geom_tile` (heatmaps) | ✓ |
 
 ## Installation
 
