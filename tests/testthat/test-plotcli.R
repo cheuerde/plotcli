@@ -37,3 +37,33 @@ test_that("plotcli R6 class works", {
   expect_silent(plot$add_data(data_2))
   expect_output(plot$print_plot())
 })
+
+test_that("constant y-values do not error", {
+  x <- seq(0, 10, length.out = 50)
+  y <- rep(1.0, length(x))
+  expect_output(plotcli_line(x = x, y = y)$print_plot())
+  expect_output(plotcli_line(x = x, y = y, braille = TRUE)$print_plot())
+  expect_silent(plotcli_scatter(x = x, y = y))
+  expect_silent(plotcli_scatter(x = x, y = y, braille = TRUE))
+})
+
+test_that("constant x-values do not error", {
+  x <- rep(5, 50)
+  y <- seq(0, 10, length.out = 50)
+  expect_output(plotcli_line(x = x, y = y)$print_plot())
+  expect_silent(plotcli_scatter(x = x, y = y))
+})
+
+test_that("constant x and y values do not error", {
+  x <- rep(3, 50)
+  y <- rep(7, 50)
+  expect_output(plotcli_line(x = x, y = y)$print_plot())
+  expect_silent(plotcli_scatter(x = x, y = y))
+})
+
+test_that("constant zero values do not error", {
+  x <- seq(0, 10, length.out = 50)
+  y <- rep(0, length(x))
+  expect_output(plotcli_line(x = x, y = y)$print_plot())
+  expect_silent(plotcli_scatter(x = x, y = y))
+})

@@ -134,6 +134,9 @@ normalize_data <- function(data,
                            data_min,
                            data_max,
                            plot_range) {
+    if (data_max == data_min) {
+        return(rep(round(plot_range / 2), length(data)))
+    }
     val <- ((data - data_min) / (data_max - data_min) * (plot_range)) + 1
     val[val < 1] <- 1
     val[val > plot_range] <- plot_range

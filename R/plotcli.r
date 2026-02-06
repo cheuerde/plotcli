@@ -465,9 +465,15 @@ plotcli <- R6Class("plotcli",
 
       if (is.null(self$xlim)) {
         x_range <- self$x_max - self$x_min
-        cushion_x <- x_range * cushion_percentage
-        self$x_min <- self$x_min - cushion_x
-        self$x_max <- self$x_max + cushion_x
+        if (x_range == 0) {
+          expand <- if (self$x_min == 0) 1 else abs(self$x_min) * 0.05
+          self$x_min <- self$x_min - expand
+          self$x_max <- self$x_max + expand
+        } else {
+          cushion_x <- x_range * cushion_percentage
+          self$x_min <- self$x_min - cushion_x
+          self$x_max <- self$x_max + cushion_x
+        }
       } else {
         self$x_min <- self$xlim[1]
         self$x_max <- self$xlim[2]
@@ -475,9 +481,15 @@ plotcli <- R6Class("plotcli",
 
       if (is.null(self$ylim)) {
         y_range <- self$y_max - self$y_min
-        cushion_y <- y_range * cushion_percentage
-        self$y_min <- self$y_min - cushion_y
-        self$y_max <- self$y_max + cushion_y
+        if (y_range == 0) {
+          expand <- if (self$y_min == 0) 1 else abs(self$y_min) * 0.05
+          self$y_min <- self$y_min - expand
+          self$y_max <- self$y_max + expand
+        } else {
+          cushion_y <- y_range * cushion_percentage
+          self$y_min <- self$y_min - cushion_y
+          self$y_max <- self$y_max + cushion_y
+        }
       } else {
         self$y_min <- self$ylim[1]
         self$y_max <- self$ylim[2]
