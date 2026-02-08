@@ -42,3 +42,95 @@ test_that("GeomBar works", {
   expect_output(res <- ggplotcli(p))
   expect_s3_class(res, "Canvas")
 })
+
+test_that("GeomStep works", {
+  df <- data.frame(x = 1:10, y = cumsum(rnorm(10)))
+  p <- ggplot(df, aes(x, y)) + geom_step()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomAbline works", {
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() +
+    geom_abline(intercept = 37, slope = -5, color = "red")
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomRibbon works", {
+  df <- data.frame(x = 1:20, y = sin(1:20 / 3),
+                   ymin = sin(1:20 / 3) - 0.5, ymax = sin(1:20 / 3) + 0.5)
+  p <- ggplot(df, aes(x, y)) +
+    geom_ribbon(aes(ymin = ymin, ymax = ymax), fill = "steelblue") +
+    geom_line()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomSmooth with ribbon works", {
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() +
+    geom_smooth(method = "lm")
+  expect_output(res <- suppressMessages(ggplotcli(p)))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomErrorbar works", {
+  df <- data.frame(x = 1:5, y = c(2, 4, 3, 5, 4),
+                   ymin = c(1, 3, 2, 4, 3), ymax = c(3, 5, 4, 6, 5))
+  p <- ggplot(df, aes(x, y, ymin = ymin, ymax = ymax)) +
+    geom_errorbar(width = 0.3) + geom_point()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomLinerange works", {
+  df <- data.frame(x = 1:5, y = c(2, 4, 3, 5, 4),
+                   ymin = c(1, 3, 2, 4, 3), ymax = c(3, 5, 4, 6, 5))
+  p <- ggplot(df, aes(x, y, ymin = ymin, ymax = ymax)) + geom_linerange()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomPointrange works", {
+  df <- data.frame(x = 1:5, y = c(2, 4, 3, 5, 4),
+                   ymin = c(1, 3, 2, 4, 3), ymax = c(3, 5, 4, 6, 5))
+  p <- ggplot(df, aes(x, y, ymin = ymin, ymax = ymax)) + geom_pointrange()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomCrossbar works", {
+  df <- data.frame(x = 1:5, y = c(2, 4, 3, 5, 4),
+                   ymin = c(1, 3, 2, 4, 3), ymax = c(3, 5, 4, 6, 5))
+  p <- ggplot(df, aes(x, y, ymin = ymin, ymax = ymax)) +
+    geom_crossbar(fill = "lightblue")
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomRug works", {
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + geom_rug()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomLabel works", {
+  df <- data.frame(x = c(1, 2, 3), y = c(3, 1, 2), lab = c("A", "B", "C"))
+  p <- ggplot(df, aes(x, y, label = lab)) + geom_label()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomRaster works", {
+  df <- expand.grid(x = 1:10, y = 1:10)
+  df$z <- runif(100)
+  p <- ggplot(df, aes(x, y, fill = z)) + geom_raster()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
+
+test_that("GeomViolin works", {
+  p <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_violin()
+  expect_output(res <- ggplotcli(p))
+  expect_s3_class(res, "Canvas")
+})
