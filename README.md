@@ -6,7 +6,7 @@
 [![Downloads](https://cranlogs.r-pkg.org/badges/plotcli?color=blue)](https://www.r-pkg.org/pkg/plotcli)
 
 <p align="center">
-  <img src="docs/hero.png" alt="plotcli hero: scatter with regression lines" width="700">
+  <img src="docs/scatter.png" alt="plotcli: colored scatter plot in terminal" width="700">
 </p>
 
 plotcli renders ggplot2 plots directly in the terminal using Unicode Braille characters and ANSI colors.
@@ -34,119 +34,66 @@ library(ggplot2)
 
 p <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Motor Trend: MPG vs Weight",
+  labs(title = "MPG vs Weight by Cylinders",
        x = "Weight (1000 lbs)", y = "Miles per Gallon",
-       color = "Cylinders")
+       color = "Cylinders") +
+  theme_bw()
 
-ggplotcli(p, width = 65, height = 22)
+ggplotcli(p)
 ```
 
 <p align="center">
-  <img src="docs/hero.png" alt="Scatter with regression lines" width="700">
+  <img src="docs/scatter.png" alt="Scatter plot with colored groups" width="700">
 </p>
 
 ## Gallery
 
-### Scatter Plot
+### Boxplots
 
 ```r
-p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point() +
-  labs(title = "Iris: Sepal Dimensions", x = "Sepal Length", y = "Sepal Width")
-ggplotcli(p, width = 60, height = 20)
-```
-
-<p align="center">
-  <img src="docs/scatter.png" alt="Scatter plot" width="700">
-</p>
-
-### Line Chart
-
-```r
-df <- data.frame(
-  x = rep(seq(0, 4 * pi, length.out = 100), 2),
-  y = c(sin(seq(0, 4 * pi, length.out = 100)),
-        cos(seq(0, 4 * pi, length.out = 100))),
-  Function = rep(c("sin(x)", "cos(x)"), each = 100)
-)
-p <- ggplot(df, aes(x, y, color = Function)) +
-  geom_line() +
-  labs(title = "Trigonometric Functions", x = "x", y = "y")
-ggplotcli(p, width = 60, height = 20)
-```
-
-<p align="center">
-  <img src="docs/line.png" alt="Line chart" width="700">
-</p>
-
-### Bar Chart
-
-```r
-p <- ggplot(mtcars, aes(x = factor(cyl))) +
-  geom_bar(fill = "steelblue") +
-  labs(title = "Cars by Cylinder Count", x = "Cylinders", y = "Count")
-ggplotcli(p, width = 60, height = 20)
-```
-
-<p align="center">
-  <img src="docs/bar.png" alt="Bar chart" width="700">
-</p>
-
-### Histogram
-
-```r
-p <- ggplot(faithful, aes(x = eruptions)) +
-  geom_histogram(bins = 20, fill = "steelblue", color = "white") +
-  labs(title = "Old Faithful Eruption Duration", x = "Duration (min)", y = "Count")
-ggplotcli(p, width = 60, height = 20)
-```
-
-<p align="center">
-  <img src="docs/histogram.png" alt="Histogram" width="700">
-</p>
-
-### Boxplot
-
-```r
-p <- ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
-  geom_boxplot(fill = "steelblue") +
-  labs(title = "MPG by Cylinder Count", x = "Cylinders", y = "Miles per Gallon")
-ggplotcli(p, width = 60, height = 20)
+p <- ggplot(df, aes(x = group, y = value, fill = group)) +
+  geom_boxplot() +
+  labs(title = "Distribution Comparison by Group")
+ggplotcli(p)
 ```
 
 <p align="center">
   <img src="docs/boxplot.png" alt="Boxplot" width="700">
 </p>
 
-### Violin Plot
+### Line Charts
 
 ```r
-p <- ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
-  geom_violin(fill = "steelblue") +
-  geom_boxplot(width = 0.15, fill = "white") +
-  labs(title = "MPG Distribution by Cylinders", x = "Cylinders", y = "Miles per Gallon")
-ggplotcli(p, width = 60, height = 20)
+p <- ggplot(economics, aes(x = date, y = unemploy)) +
+  geom_line(color = "steelblue") +
+  geom_smooth(color = "red", se = FALSE) +
+  labs(title = "US Unemployment Over Time")
+ggplotcli(p)
 ```
 
 <p align="center">
-  <img src="docs/violin.png" alt="Violin plot" width="700">
+  <img src="docs/line.png" alt="Line chart" width="700">
 </p>
 
-### Density Plot
+### Bar Charts
 
-```r
-p <- ggplot(iris, aes(x = Sepal.Length, color = Species)) +
-  geom_density() +
-  labs(title = "Sepal Length by Species", x = "Sepal Length", y = "Density")
-ggplotcli(p, width = 60, height = 20)
-```
+<p align="center">
+  <img src="docs/bar.png" alt="Bar chart" width="700">
+</p>
+
+### Histograms
+
+<p align="center">
+  <img src="docs/histogram.png" alt="Histogram" width="700">
+</p>
+
+### Density Plots
 
 <p align="center">
   <img src="docs/density.png" alt="Density plot" width="700">
 </p>
 
-### Heatmap
+### Heatmaps
 
 ```r
 cor_mat <- cor(mtcars[, c("mpg", "cyl", "disp", "hp", "wt", "qsec")])
@@ -154,28 +101,39 @@ df <- as.data.frame(as.table(cor_mat))
 names(df) <- c("Var1", "Var2", "value")
 p <- ggplot(df, aes(Var1, Var2, fill = value)) +
   geom_tile() +
-  labs(title = "Correlation Matrix", fill = "r")
-ggplotcli(p, width = 55, height = 20)
+  labs(title = "Correlation Heatmap", fill = "correlation")
+ggplotcli(p)
 ```
 
 <p align="center">
   <img src="docs/heatmap.png" alt="Heatmap" width="700">
 </p>
 
-### Faceted Plot
+### Faceted Plots
 
 ```r
-p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+p <- ggplot(mpg, aes(x = displ, y = hwy)) +
   geom_point(color = "steelblue") +
   geom_smooth(method = "lm", color = "red", se = FALSE) +
-  facet_wrap(~cyl) +
-  labs(title = "MPG vs Weight by Cylinders", x = "Weight", y = "MPG") +
+  facet_wrap(~drv) +
   theme_bw()
-ggplotcli(p, width = 75, height = 18)
+ggplotcli(p, width = 80, height = 18)
 ```
 
 <p align="center">
   <img src="docs/facet.png" alt="Faceted plot" width="700">
+</p>
+
+### Canvas Types
+
+**Block canvas** -- medium resolution using block characters:
+<p align="center">
+  <img src="docs/block.png" alt="Block canvas" width="600">
+</p>
+
+**ASCII canvas** -- basic ASCII for maximum compatibility:
+<p align="center">
+  <img src="docs/ascii.png" alt="ASCII canvas" width="600">
 </p>
 
 ## Supported Geoms (27)
