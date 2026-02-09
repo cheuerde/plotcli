@@ -1,0 +1,62 @@
+---
+title: "plotcli Convenience Wrappers"
+author: "Claas Heuer"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{plotcli Convenience Wrappers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Using `plotcli` convenience wrappers
+
+# Density plot
+
+```{r}
+library(plotcli)
+# Generate sample data
+sample_data <- rnorm(1000, mean = 5, sd = 2)
+
+# Create a density plot
+plotcli_density(sample_data, color = "blue", braille = TRUE)
+``` 
+
+# Histogram
+
+```{r}
+# Generate sample data
+sample_data <- rnorm(1000, mean = 5, sd = 2)
+
+# Create a histogram
+plotcli_histogram(sample_data, color = "yellow")
+``` 
+
+# Scatterplot
+
+```{r}
+# Create a scatter plot
+plotcli_scatter(x = iris$`Sepal.Width`, y = iris$`Sepal.Length`, color = "magenta", braille = FALSE)
+``` 
+
+# Lineplot
+
+```{r}
+
+# make sin 
+x <- seq(0, 2*pi, length.out = 50)
+y <- sin(x)
+
+# Create a line plot
+plotcli_line(x = x, y = cos(y), color = "green")
+plotcli_line(x = x, y = x, color = "magenta", braille = FALSE)
+``` 
+
+

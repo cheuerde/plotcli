@@ -4,7 +4,8 @@
 \alias{create_panel_scales}
 \title{Create Scales for a Single Panel}
 \usage{
-create_panel_scales(panel_params, plot_width, plot_height, has_border = FALSE)
+create_panel_scales(panel_params, plot_width, plot_height,
+  has_border = FALSE, x_mult = 1, y_mult = 1)
 }
 \arguments{
 \item{panel_params}{Panel parameters from ggplot_build}
@@ -14,6 +15,10 @@ create_panel_scales(panel_params, plot_width, plot_height, has_border = FALSE)
 \item{plot_height}{Pixel height}
 
 \item{has_border}{Whether a border will be drawn (adds padding)}
+
+\item{x_mult}{X multiplier for canvas type (e.g., 2 for braille)}
+
+\item{y_mult}{Y multiplier for canvas type (e.g., 4 for braille)}
 }
 \value{
 List with scale functions

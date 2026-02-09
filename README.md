@@ -174,9 +174,9 @@ ggplotcli(p, canvas_type = "ascii")    # ASCII only
 For lower-level control, use the `plotcli` R6 class directly:
 
 ```r
-pc <- plotcli$new(width = 60, height = 20)
-pc$add_data(mtcars$wt, mtcars$mpg)
-pc$add_title("MPG vs Weight")
+pc <- plotcli$new(plot_width = 60, plot_height = 20, x_label = "wt", y_label = "mpg",
+                  title = "MPG vs Weight")
+pc$add_data(list(x = mtcars$wt, y = mtcars$mpg, type = "scatter", name = "mtcars"))
 pc$print_plot()
 ```
 
