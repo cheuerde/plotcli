@@ -1,3 +1,23 @@
+# plotcli 0.3.0
+
+## New Geom Handlers
+
+* **11 new geom handlers** bringing total support from 16 to 27 geoms:
+  `geom_step`, `geom_abline`, `geom_ribbon`, `geom_errorbar`,
+  `geom_linerange`, `geom_pointrange`, `geom_crossbar`, `geom_rug`,
+  `geom_label`, `geom_raster`, `geom_violin`
+
+* **Violin plots**: Proper mirrored density rendering using `violinwidth`
+  for accurate shape computation
+
+## Bug Fixes
+
+* Fixed division by zero when plotting constant data values
+  (e.g., all y-values identical) - both root cause fix in `get_min_max()`
+  and defensive guard in `normalize_data()` (Closes #1)
+
+---
+
 # plotcli 0.2.0
 
 ## Major New Features

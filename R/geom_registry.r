@@ -987,6 +987,357 @@ geom_tile_handler <- function(data, canvas, scales, params, style_opts = NULL) {
 
 
 # ============================================================================
+# Additional Geom Handlers
+# ============================================================================
+
+#' GeomStep Handler
+#'
+#' Renders step functions (staircase lines)
+#' @keywords internal
+geom_step_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  # Group by group if present
+  if ("group" %in% names(data)) {
+    groups <- unique(data$group)
+  } else {
+    groups <- 1
+    data$group <- 1
+  }
+
+  for (grp in groups) {
+    grp_data <- data[data$group == grp, ]
+    grp_data <- grp_data[order(grp_data$x), ]
+    if (nrow(grp_data) < 2) next
+
+    color <- if ("colour" %in% names(grp_data)) {
+      color_to_term(grp_data$colour[1])
+    } else {
+      NULL
+    }
+
+    # Build step coordinates: horizontal then vertical
+    xs <- numeric(0)
+    ys <- numeric(0)
+    for (i in seq_len(nrow(grp_data))) {
+      sx <- scales$x(grp_data$x[i])
+      sy <- scales$y(grp_data$y[i])
+      if (i > 1) {
+        # Horizontal segment to new x at previous y
+        xs <- c(xs, sx)
+        ys <- c(ys, ys[length(ys)])
+      }
+      xs <- c(xs, sx)
+      ys <- c(ys, sy)
+    }
+
+    canvas$draw_polyline(xs, ys, color)
+  }
+}
+
+#' GeomAbline Handler
+#'
+#' Renders diagonal reference lines (slope + intercept)
+#' @keywords internal
+geom_abline_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+
+  for (i in seq_len(nrow(data))) {
+    intercept <- data$intercept[i]
+    slope <- data$slope[i]
+
+    color <- colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    # Compute line endpoints from x_range
+    x0 <- scales$x_range[1]
+    x1 <- scales$x_range[2]
+    y0 <- intercept + slope * x0
+    y1 <- intercept + slope * x1
+
+    # Clamp to y_range
+    y0 <- max(scales$y_range[1], min(scales$y_range[2], y0))
+    y1 <- max(scales$y_range[1], min(scales$y_range[2], y1))
+
+    canvas$draw_line(
+      round(scales$x(x0)), round(scales$y(y0)),
+      round(scales$x(x1)), round(scales$y(y1)),
+      color
+    )
+  }
+}
+
+#' GeomRibbon Handler
+#'
+#' Renders filled ribbons between ymin and ymax
+#' @keywords internal
+geom_ribbon_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  if ("group" %in% names(data)) {
+    groups <- unique(data$group)
+  } else {
+    groups <- 1
+    data$group <- 1
+  }
+
+  for (grp in groups) {
+    grp_data <- data[data$group == grp, ]
+    grp_data <- grp_data[order(grp_data$x), ]
+    if (nrow(grp_data) < 2) next
+
+    color <- if ("fill" %in% names(grp_data)) {
+      color_to_term(grp_data$fill[1])
+    } else if ("colour" %in% names(grp_data)) {
+      color_to_term(grp_data$colour[1])
+    } else {
+      NULL
+    }
+
+    # Fill between ymin and ymax by drawing vertical segments
+    for (i in seq_len(nrow(grp_data))) {
+      x_px <- round(scales$x(grp_data$x[i]))
+      ymin_px <- round(scales$y(grp_data$ymin[i]))
+      ymax_px <- round(scales$y(grp_data$ymax[i]))
+      # y is inverted: ymax_px < ymin_px in pixel space
+      top <- min(ymin_px, ymax_px)
+      bottom <- max(ymin_px, ymax_px)
+      for (py in top:bottom) {
+        canvas$set_pixel(x_px, py, color)
+      }
+    }
+  }
+}
+
+#' GeomErrorbar Handler
+#'
+#' Renders vertical error bars with horizontal caps
+#' @keywords internal
+geom_errorbar_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+
+  for (i in seq_len(nrow(data))) {
+    color <- colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    x_px <- round(scales$x(data$x[i]))
+    ymin_px <- round(scales$y(data$ymin[i]))
+    ymax_px <- round(scales$y(data$ymax[i]))
+
+    # Vertical line
+    canvas$draw_line(x_px, ymin_px, x_px, ymax_px, color)
+
+    # Horizontal caps using xmin/xmax if available, otherwise approximate
+    if ("xmin" %in% names(data) && "xmax" %in% names(data)) {
+      xmin_px <- round(scales$x(data$xmin[i]))
+      xmax_px <- round(scales$x(data$xmax[i]))
+    } else {
+      cap_half <- max(2, round(scales$width * 0.01))
+      xmin_px <- x_px - cap_half
+      xmax_px <- x_px + cap_half
+    }
+
+    canvas$draw_line(xmin_px, ymin_px, xmax_px, ymin_px, color)
+    canvas$draw_line(xmin_px, ymax_px, xmax_px, ymax_px, color)
+  }
+}
+
+#' GeomLinerange Handler
+#'
+#' Renders vertical line ranges (no caps)
+#' @keywords internal
+geom_linerange_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+
+  for (i in seq_len(nrow(data))) {
+    color <- colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    x_px <- round(scales$x(data$x[i]))
+    ymin_px <- round(scales$y(data$ymin[i]))
+    ymax_px <- round(scales$y(data$ymax[i]))
+
+    canvas$draw_line(x_px, ymin_px, x_px, ymax_px, color)
+  }
+}
+
+#' GeomPointrange Handler
+#'
+#' Renders point with vertical line range
+#' @keywords internal
+geom_pointrange_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+
+  for (i in seq_len(nrow(data))) {
+    color <- colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    x_px <- round(scales$x(data$x[i]))
+    y_px <- round(scales$y(data$y[i]))
+    ymin_px <- round(scales$y(data$ymin[i]))
+    ymax_px <- round(scales$y(data$ymax[i]))
+
+    # Line range
+    canvas$draw_line(x_px, ymin_px, x_px, ymax_px, color)
+    # Point at center
+    canvas$set_pixel(x_px, y_px, color)
+  }
+}
+
+#' GeomCrossbar Handler
+#'
+#' Renders crossbar (box with middle line, no whiskers)
+#' @keywords internal
+geom_crossbar_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  fill_colors <- if ("fill" %in% names(data)) data$fill else rep(NA, nrow(data))
+  outline_colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+
+  for (i in seq_len(nrow(data))) {
+    color <- outline_colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    fill_color <- fill_colors[i]
+    if (!is.null(fill_color) && !is.na(fill_color)) {
+      fill_color <- color_to_term(fill_color)
+    } else {
+      fill_color <- NULL
+    }
+
+    xmin_px <- round(scales$x(data$xmin[i]))
+    xmax_px <- round(scales$x(data$xmax[i]))
+    y_px <- round(scales$y(data$y[i]))
+    ymin_px <- round(scales$y(data$ymin[i]))
+    ymax_px <- round(scales$y(data$ymax[i]))
+
+    # Fill if fill color given
+    if (!is.null(fill_color)) {
+      canvas$fill_rect(xmin_px, min(ymin_px, ymax_px), xmax_px, max(ymin_px, ymax_px), fill_color)
+    }
+
+    # Outline rectangle
+    canvas$draw_rect(xmin_px, min(ymin_px, ymax_px), xmax_px, max(ymin_px, ymax_px), color)
+    # Middle line (median)
+    canvas$draw_line(xmin_px, y_px, xmax_px, y_px, color)
+  }
+}
+
+#' GeomRug Handler
+#'
+#' Renders rug marks (short tick marks along axes)
+#' @keywords internal
+geom_rug_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  colors <- if ("colour" %in% names(data)) data$colour else rep("white", nrow(data))
+  rug_length <- max(2, round(scales$height * 0.03))
+
+  for (i in seq_len(nrow(data))) {
+    color <- colors[i]
+    if (!is.null(color) && !is.na(color)) {
+      color <- color_to_term(color)
+    } else {
+      color <- NULL
+    }
+
+    # X rug: short vertical tick at bottom
+    if ("x" %in% names(data) && !is.na(data$x[i])) {
+      x_px <- round(scales$x(data$x[i]))
+      canvas$draw_line(x_px, scales$height, x_px, scales$height - rug_length, color)
+    }
+
+    # Y rug: short horizontal tick at left
+    if ("y" %in% names(data) && !is.na(data$y[i])) {
+      y_px <- round(scales$y(data$y[i]))
+      canvas$draw_line(1, y_px, 1 + rug_length, y_px, color)
+    }
+  }
+}
+
+#' GeomLabel Handler
+#'
+#' Renders text labels (same as geom_text for terminal)
+#' @keywords internal
+geom_label_handler <- geom_text_handler
+
+#' GeomRaster Handler
+#'
+#' Renders raster images (same as tile for terminal)
+#' @keywords internal
+geom_raster_handler <- geom_tile_handler
+
+#' GeomViolin Handler
+#'
+#' Renders violin plots (mirrored density curves)
+#' @keywords internal
+geom_violin_handler <- function(data, canvas, scales, params, style_opts = NULL) {
+  if ("group" %in% names(data)) {
+    groups <- unique(data$group)
+  } else {
+    groups <- 1
+    data$group <- 1
+  }
+
+  for (grp in groups) {
+    grp_data <- data[data$group == grp, ]
+    grp_data <- grp_data[order(grp_data$y), ]
+    if (nrow(grp_data) < 2) next
+
+    fill_color <- if ("fill" %in% names(grp_data) && !is.na(grp_data$fill[1])) {
+      color_to_term(grp_data$fill[1])
+    } else {
+      NULL
+    }
+
+    outline_color <- if ("colour" %in% names(grp_data) && !is.na(grp_data$colour[1])) {
+      color_to_term(grp_data$colour[1])
+    } else {
+      fill_color
+    }
+
+    # Compute actual violin edges from violinwidth
+    # (xmin/xmax in data are group bounds, not the per-slice shape)
+    x_center <- grp_data$x
+    vw <- grp_data$violinwidth
+    xminv <- x_center - vw * (x_center - grp_data$xmin)
+    xmaxv <- x_center + vw * (grp_data$xmax - x_center)
+
+    # Fill violin body
+    for (i in seq_len(nrow(grp_data))) {
+      xmin_px <- round(scales$x(xminv[i]))
+      xmax_px <- round(scales$x(xmaxv[i]))
+      y_px <- round(scales$y(grp_data$y[i]))
+      if (xmin_px <= xmax_px) {
+        for (px in xmin_px:xmax_px) {
+          canvas$set_pixel(px, y_px, fill_color)
+        }
+      }
+    }
+
+    # Draw outline polylines for left and right edges
+    xs_left <- sapply(xminv, scales$x)
+    xs_right <- sapply(xmaxv, scales$x)
+    ys <- sapply(grp_data$y, scales$y)
+    canvas$draw_polyline(xs_left, ys, outline_color)
+    canvas$draw_polyline(xs_right, ys, outline_color)
+  }
+}
+
+
+# ============================================================================
 # Register Built-in Geoms
 # ============================================================================
 
@@ -1007,6 +1358,17 @@ geom_tile_handler <- function(data, canvas, scales, params, style_opts = NULL) {
   register_geom("GeomHistogram", geom_histogram_handler)
   register_geom("GeomText", geom_text_handler)
   register_geom("GeomBoxplot", geom_boxplot_handler)
+  register_geom("GeomStep", geom_step_handler)
+  register_geom("GeomAbline", geom_abline_handler)
+  register_geom("GeomRibbon", geom_ribbon_handler)
+  register_geom("GeomErrorbar", geom_errorbar_handler)
+  register_geom("GeomLinerange", geom_linerange_handler)
+  register_geom("GeomPointrange", geom_pointrange_handler)
+  register_geom("GeomCrossbar", geom_crossbar_handler)
+  register_geom("GeomRug", geom_rug_handler)
+  register_geom("GeomLabel", geom_label_handler)
+  register_geom("GeomRaster", geom_raster_handler)
+  register_geom("GeomViolin", geom_violin_handler)
 }
 
 # Register geoms when the file is sourced
